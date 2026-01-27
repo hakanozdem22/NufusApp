@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "egitim-robotu",
+  "private_key_id": "3172f30cdafd46727a70a903a5a7c75312ea9005",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCbtXTQkgDARfLr\nmeypsp9EiZPOcOgqcviO7T83qLtn6rkL2Mf7s7IrPpV+odoU2uulu3GOJyEv9KAZ\n9NZuz5e7Gbyf1TsOffJnnkPXT2vz2RPmoEgSq32J26MD8rmAEL+4/4B8gPhy2QFc\nNbgJ62+ffyDrmc2OfInQJnEZUYJTkmSzwGvxj6YO5mgJZy5lCoI4zR3ySfwIFEhY\nN+5y1ws0FedReJsejaNWbVr8ipmBg4qQFyzDAyjFluo2VIkzSvzVThIUhcUYq3oz\nE58OVRHNklEJr4Azhguj+WzxXhsRrgpn2O1DXfNvOD014YaNtlPP4aGq4I5NfIvS\nt7gCNWMZAgMBAAECggEAAK2HC/T+waRStoANvcvHXre2NLYpt8ZjwTeHyJ9YhYJj\nlAlTDlj0Nxtg8KBJJnSxHu0UeJJzotWCFurWcVZzaiVmb7Z9bDnT757xDt0x8pzo\nz16DDpwmTtttniUVD3L2arQOCqMcscWyq4SX8wJORf4tlgKUfwDMY5Z8DcJDLeFZ\n0wVJCFCzGrdAdjKWthiVbcrnTrwqlOT80fKSilKblJ746H5HdPSWIKn5zLynTTQC\nZgK5YD5V6vFZdUOaxkQ3YmYUd3bzbbxfI9SDcvtN2vM8LA41Y/KspW7OYHdRE4It\n52JVvWQAmtO2/iqRAkt1BHcFLq/a/OVHjx+0+pBciQKBgQDYa60v+HJl68yD55oT\nrzeWX/ClbvJGkWsLPixUeOq13k06ivL/IXd/Gx907fjl+Jtmj3OBtiIDEuDhjeC+\n40k97iac/YxeJJPTzzhn8+mceMvvhWTCsafYKFYsed8fVpWkr5hBJ7chXopl5YaL\nMaZWbtWN4Mdlu3eWJmqhT5ymFQKBgQC4L2QIjqpg3+7ASQ7HXVrAFICtPWBl0X7f\ne1HIAx9MES7C+D5oitI7KEdKixEVYSWDugBfE/UxHPsgEMCQjWP0XlkE+hC87UXK\n/5Rv0Sb2C5BX7JNhZLy8rH5dNJAsboF10HHpo9L4zV0n6JL+5Ndy5+Cx+ijiRBK6\noKqswKXt9QKBgQCl9WxJbOvM3JVoUSIGFkc6OTgApKOFGd5MMNEttcvGy0HNst/E\nZZWNEu98a0CCmbIRY8/fmBtc4A0y6el+eCyiIQ3bNVN+ne3+btmCXbi3FKrOcixi\nYHmleMkcMhi3n14Be+X1kM8N98GJggk6lEhJ35RDyCsgCDIcIjmCmdo2QQKBgA3s\nNymWbzandsq+OwnC+ssuQZPW4eSQc4C9N69g3QrI+bnvPfh1FfM21jzCSmZNU6Kj\nese1IIG36RvBaG0E4xtjzmLb7Ev7u5zeuP/C1akfsqeS0Ik6LjIs79hn0sYpDEw1\nl4bLxXTdQT91CzeNYOPkt0181X5VGv1Ui9JHNcPJAoGAKnQ7meUuux4KxfYbvB7Z\ngBN4N5L3fv7fYzH2z6Vm1cdNpGmWuMuIHPRf4ly6t/rFKbtjRbIBreUjJgyu5UxE\nw6KN4PM5YokH4M5hL0yr85m0PPPnkwyxRfswPjpcZ241U8hMVB4zGbTym49eWHB4\n8PygY8nIz1cyETdNZyhsbTQ=\n-----END PRIVATE KEY-----\n",
+  "client_email": "superapp@egitim-robotu.iam.gserviceaccount.com",
+  "client_id": "114928568520589363734",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/superapp%40egitim-robotu.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
