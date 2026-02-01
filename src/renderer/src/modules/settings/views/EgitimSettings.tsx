@@ -6,6 +6,7 @@ import {
   User,
   BookOpen,
   Users,
+  Briefcase,
   Sun,
   Moon,
   Edit,
@@ -14,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useSettingsViewModel } from '../viewmodels/useSettingsViewModel'
 
-export const EgitimSettings = () => {
+export const EgitimSettings = (): JSX.Element => {
   const {
     egitimKonular,
     konuEkle,
@@ -24,6 +25,10 @@ export const EgitimSettings = () => {
     egiticiEkle,
     egiticiSil,
     egiticiGuncelle, // ADDED
+    egitimDuzenleyenler,
+    duzenleyenEkle,
+    duzenleyenSil,
+    duzenleyenGuncelle,
     egitimPersoneller,
     egitimPersonelEkle,
     egitimPersonelSil,
@@ -40,6 +45,12 @@ export const EgitimSettings = () => {
   const [yeniEgitici, setYeniEgitici] = useState({ ad: '', unvan: '' })
   const [duzenlenenEgiticiId, setDuzenlenenEgiticiId] = useState<number | null>(null) // YENİ
 
+  // Düzenleyen State
+  const [yeniDuzenleyen, setYeniDuzenleyen] = useState({ ad: '', unvan: '' })
+  const [duzenlenenDuzenleyenId, setDuzenlenenDuzenleyenId] = useState<number | null>(null)
+
+
+
   // Personel State
   const [yeniPersonel, setYeniPersonel] = useState({
     ad: '',
@@ -54,7 +65,7 @@ export const EgitimSettings = () => {
   // const [silPersonelId, setSilPersonelId] = useState<number | null>(null)
 
   // HANDLERS
-  const handleKonuSubmit = async (e: React.FormEvent) => {
+  const handleKonuSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
     if (!yeniKonu.trim()) return
 
@@ -99,6 +110,34 @@ export const EgitimSettings = () => {
   const iptalEgiticiDuzenle = () => {
     setDuzenlenenEgiticiId(null)
     setYeniEgitici({ ad: '', unvan: '' })
+  }
+
+  // DÜZENLEYEN İŞLEMLERİ
+  const handleDuzenleyenSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!yeniDuzenleyen.ad.trim()) return
+
+    if (duzenlenenDuzenleyenId !== null) {
+      await duzenleyenGuncelle(
+        duzenlenenDuzenleyenId,
+        yeniDuzenleyen.ad.trim(),
+        yeniDuzenleyen.unvan.trim()
+      )
+      setDuzenlenenDuzenleyenId(null)
+    } else {
+      await duzenleyenEkle(yeniDuzenleyen.ad.trim(), yeniDuzenleyen.unvan.trim())
+    }
+    setYeniDuzenleyen({ ad: '', unvan: '' })
+  }
+
+  const baslaDuzenleyenDuzenle = (item: any) => {
+    setDuzenlenenDuzenleyenId(item.id)
+    setYeniDuzenleyen({ ad: item.ad_soyad, unvan: item.unvan })
+  }
+
+  const iptalDuzenleyenDuzenle = () => {
+    setDuzenlenenDuzenleyenId(null)
+    setYeniDuzenleyen({ ad: '', unvan: '' })
   }
 
   // PERSONEL İŞLEMLERİ
@@ -231,22 +270,27 @@ export const EgitimSettings = () => {
             {egitimEgiticiler.length === 0 ? (
               <div className="p-4 text-center text-gray-400 text-sm">Liste boş.</div>
             ) : (
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
+              <table className="w-full text-sm text-left opacity-100">
+                <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 font-medium border-b border-gray-200 dark:border-gray-700">
                   <tr>
                     <th className="px-4 py-2">Ad Soyad</th>
                     <th className="px-4 py-2">Unvan</th>
                     <th className="px-4 py-2 w-24"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                   {egitimEgiticiler.map((item) => (
                     <tr
                       key={item.id}
-                      className={`hover:bg-gray-50 ${duzenlenenEgiticiId === item.id ? 'bg-orange-50' : ''}`}
+                      className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${duzenlenenEgiticiId === item.id
+                        ? 'bg-orange-50 dark:bg-orange-900/20'
+                        : 'bg-white dark:bg-gray-800'
+                        }`}
                     >
-                      <td className="px-4 py-2 font-medium">{item.ad_soyad}</td>
-                      <td className="px-4 py-2 text-gray-500">{item.unvan}</td>
+                      <td className="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">
+                        {item.ad_soyad}
+                      </td>
+                      <td className="px-4 py-2 text-gray-500 dark:text-gray-400">{item.unvan}</td>
                       <td className="px-4 py-2 text-right flex justify-end gap-1">
                         <button
                           onClick={() => baslaEgiticiDuzenle(item)}
@@ -257,6 +301,119 @@ export const EgitimSettings = () => {
                         </button>
                         <button
                           onClick={() => egiticiSil(item.id)}
+                          className="p-1 text-red-400 hover:text-red-600 transition-colors"
+                          title="Sil"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 2. DÜZENLEYENLER */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
+          <Briefcase className="text-purple-600" size={24} />
+          <div>
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white">Düzenleyen Kişiler</h3>
+            <p className="text-gray-500 text-xs">Eğitimi düzenleyen kişileri tanımlayın.</p>
+          </div>
+        </div>
+        <div className="p-6">
+          <form onSubmit={handleDuzenleyenSubmit} className="flex gap-3 mb-6 items-end">
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Düzenleyen Adı
+              </label>
+              <input
+                type="text"
+                placeholder="Ad Soyad"
+                value={yeniDuzenleyen.ad}
+                onChange={(e) =>
+                  setYeniDuzenleyen({ ...yeniDuzenleyen, ad: formatAdSoyad(e.target.value) })
+                }
+                className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:ring-2 outline-none dark:text-white ${duzenlenenDuzenleyenId ? 'border-purple-300 focus:ring-purple-200 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-600 focus:ring-purple-100 focus:border-purple-400'}`}
+              />
+            </div>
+            <div className="w-1/4">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Unvan</label>
+              <input
+                type="text"
+                placeholder="Unvan"
+                value={yeniDuzenleyen.unvan}
+                onChange={(e) => setYeniDuzenleyen({ ...yeniDuzenleyen, unvan: e.target.value })}
+                className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:ring-2 outline-none uppercase dark:text-white ${duzenlenenDuzenleyenId ? 'border-purple-300 focus:ring-purple-200 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-600 focus:ring-purple-100 focus:border-purple-400'}`}
+              />
+            </div>
+
+            {duzenlenenDuzenleyenId ? (
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={!yeniDuzenleyen.ad.trim()}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  <Check size={18} /> Güncelle
+                </button>
+                <button
+                  type="button"
+                  onClick={iptalDuzenleyenDuzenle}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+                >
+                  <X size={18} /> İptal
+                </button>
+              </div>
+            ) : (
+              <button
+                type="submit"
+                disabled={!yeniDuzenleyen.ad.trim()}
+                className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <Plus size={18} /> Ekle
+              </button>
+            )}
+          </form>
+          <div className="max-h-60 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+            {egitimDuzenleyenler.length === 0 ? (
+              <div className="p-4 text-center text-gray-400 text-sm">Liste boş.</div>
+            ) : (
+              <table className="w-full text-sm text-left opacity-100">
+                <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 font-medium border-b border-gray-200 dark:border-gray-700">
+                  <tr>
+                    <th className="px-4 py-2">Ad Soyad</th>
+                    <th className="px-4 py-2">Unvan</th>
+                    <th className="px-4 py-2 w-24"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                  {egitimDuzenleyenler.map((item) => (
+                    <tr
+                      key={item.id}
+                      className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${duzenlenenDuzenleyenId === item.id
+                        ? 'bg-purple-50 dark:bg-purple-900/20'
+                        : 'bg-white dark:bg-gray-800'
+                        }`}
+                    >
+                      <td className="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">
+                        {item.ad_soyad}
+                      </td>
+                      <td className="px-4 py-2 text-gray-500 dark:text-gray-400">{item.unvan}</td>
+                      <td className="px-4 py-2 text-right flex justify-end gap-1">
+                        <button
+                          onClick={() => baslaDuzenleyenDuzenle(item)}
+                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                          title="Düzenle"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => duzenleyenSil(item.id)}
                           className="p-1 text-red-400 hover:text-red-600 transition-colors"
                           title="Sil"
                         >
@@ -388,19 +545,26 @@ export const EgitimSettings = () => {
                   Sabah Grubu ({sabahGrubu.length})
                 </h4>
               </div>
-              <div className="max-h-96 overflow-y-auto bg-white">
+              <div className="max-h-96 overflow-y-auto bg-white dark:bg-gray-800">
                 {sabahGrubu.length === 0 ? (
                   <div className="p-8 text-center text-gray-400 text-sm">Liste boş.</div>
                 ) : (
                   <table className="w-full text-sm text-left">
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                       {sabahGrubu.map((item) => (
                         <tr
                           key={item.id}
-                          className={`hover:bg-gray-50 group ${duzenlenenPersonelId === item.id ? 'bg-blue-50' : ''}`}
+                          className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 group ${duzenlenenPersonelId === item.id
+                            ? 'bg-blue-50 dark:bg-blue-900/20'
+                            : 'bg-white dark:bg-gray-800'
+                            }`}
                         >
-                          <td className="px-3 py-2 font-medium">{item.ad_soyad}</td>
-                          <td className="px-3 py-2 text-gray-500 text-xs">{item.unvan}</td>
+                          <td className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">
+                            {item.ad_soyad}
+                          </td>
+                          <td className="px-3 py-2 text-gray-500 dark:text-gray-400 text-xs">
+                            {item.unvan}
+                          </td>
                           <td className="px-3 py-2 text-right flex justify-end gap-1">
                             <button
                               onClick={() => baslaPersonelDuzenle(item)}
@@ -431,19 +595,26 @@ export const EgitimSettings = () => {
                   Öğle Grubu ({ogleGrubu.length})
                 </h4>
               </div>
-              <div className="max-h-96 overflow-y-auto bg-white">
+              <div className="max-h-96 overflow-y-auto bg-white dark:bg-gray-800">
                 {ogleGrubu.length === 0 ? (
                   <div className="p-8 text-center text-gray-400 text-sm">Liste boş.</div>
                 ) : (
                   <table className="w-full text-sm text-left">
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                       {ogleGrubu.map((item) => (
                         <tr
                           key={item.id}
-                          className={`hover:bg-gray-50 group ${duzenlenenPersonelId === item.id ? 'bg-blue-50' : ''}`}
+                          className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 group ${duzenlenenPersonelId === item.id
+                            ? 'bg-blue-50 dark:bg-blue-900/20'
+                            : 'bg-white dark:bg-gray-800'
+                            }`}
                         >
-                          <td className="px-3 py-2 font-medium">{item.ad_soyad}</td>
-                          <td className="px-3 py-2 text-gray-500 text-xs">{item.unvan}</td>
+                          <td className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">
+                            {item.ad_soyad}
+                          </td>
+                          <td className="px-3 py-2 text-gray-500 dark:text-gray-400 text-xs">
+                            {item.unvan}
+                          </td>
                           <td className="px-3 py-2 text-right flex justify-end gap-1">
                             <button
                               onClick={() => baslaPersonelDuzenle(item)}
@@ -488,11 +659,10 @@ export const EgitimSettings = () => {
                 placeholder="Konu Başlığı Giriniz..."
                 value={yeniKonu}
                 onChange={(e) => setYeniKonu(e.target.value)}
-                className={`flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:ring-2 outline-none uppercase transition-colors dark:text-white ${
-                  duzenlenenKonuId
-                    ? 'border-orange-200 focus:ring-orange-100 focus:border-orange-400'
-                    : 'border-gray-200 focus:ring-teal-100 focus:border-teal-400'
-                }`}
+                className={`flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-700 border rounded-lg focus:ring-2 outline-none uppercase transition-colors dark:text-white ${duzenlenenKonuId
+                  ? 'border-orange-200 focus:ring-orange-100 focus:border-orange-400'
+                  : 'border-gray-200 focus:ring-teal-100 focus:border-teal-400'
+                  }`}
               />
               {duzenlenenKonuId ? (
                 <>
@@ -521,11 +691,11 @@ export const EgitimSettings = () => {
                 </button>
               )}
             </form>
-            <div className="max-h-[500px] overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+            <div className="max-h-[500px] overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
               {egitimKonular.length === 0 ? (
                 <div className="p-4 text-center text-gray-400 text-sm">Liste boş.</div>
               ) : (
-                <ul className="divide-y divide-gray-100">
+                <ul className="divide-y divide-gray-100 dark:divide-gray-700">
                   {egitimKonular.map((item) => (
                     <li
                       key={item.id}

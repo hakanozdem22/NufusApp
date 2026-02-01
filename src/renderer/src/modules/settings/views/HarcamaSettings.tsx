@@ -156,7 +156,7 @@ export const HarcamaSettings = () => {
         </div>
 
         {/* Liste */}
-        <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-[400px] overflow-y-auto">
+        <div className="divide-y divide-gray-100 dark:divide-gray-700">
           {personeller.length === 0 ? (
             <div className="p-10 text-center text-gray-400 dark:text-gray-500">
               Henüz kayıtlı personel yok.

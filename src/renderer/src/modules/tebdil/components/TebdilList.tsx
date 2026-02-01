@@ -85,10 +85,15 @@ export const TebdilList = ({
                   }
                   return null
                 })()}
-                {/* Dosya Varsa Mavi Dosya İkonu (Basit kontrol: Eski sistem dosya_yolu doluysa veya yeni sistemde tıklayınca görünür) */}
+                {/* Dosya Varsa Yeşil, Yoksa Mavi Dosya İkonu */}
                 <div
-                  className="p-1.5 rounded-full shadow-sm backdrop-blur bg-blue-100/90 text-blue-700 border border-blue-200"
-                  title="Resmi Yazılar / Dosyalar"
+                  className={`p-1.5 rounded-full shadow-sm backdrop-blur border ${(item.dosya_sayisi || 0) > 0
+                      ? 'bg-green-100/90 text-green-700 border-green-200'
+                      : 'bg-blue-100/90 text-blue-700 border-blue-200'
+                    }`}
+                  title={
+                    (item.dosya_sayisi || 0) > 0 ? `${item.dosya_sayisi} Adet Belge` : 'Belge Ekle'
+                  }
                 >
                   <FileText size={14} />
                 </div>

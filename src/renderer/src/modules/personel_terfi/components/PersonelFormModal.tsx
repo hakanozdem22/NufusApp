@@ -27,7 +27,8 @@ export const PersonelFormModal = ({
     terfi_suresi: 12,
     sonraki_terfi: '',
     aciklama: '',
-    departman: ''
+    departman: '',
+    ise_giris_tarihi: ''
   })
 
   // Modal açıldığında veya initialData değiştiğinde formu doldur
@@ -38,7 +39,8 @@ export const PersonelFormModal = ({
         // Tarihleri input type="date" için formatla (YYYY-MM-DD)
         atanma_tarihi: initialData.atanma_tarihi ? initialData.atanma_tarihi.split('T')[0] : '',
         terfi_tarihi: initialData.terfi_tarihi ? initialData.terfi_tarihi.split('T')[0] : '',
-        sonraki_terfi: initialData.sonraki_terfi ? initialData.sonraki_terfi.split('T')[0] : ''
+        sonraki_terfi: initialData.sonraki_terfi ? initialData.sonraki_terfi.split('T')[0] : '',
+        ise_giris_tarihi: initialData.ise_giris_tarihi ? initialData.ise_giris_tarihi.split('T')[0] : ''
       })
     } else {
       // Yeni kayıt
@@ -55,7 +57,8 @@ export const PersonelFormModal = ({
         terfi_suresi: 12,
         sonraki_terfi: '',
         aciklama: '',
-        departman: ''
+        departman: '',
+        ise_giris_tarihi: ''
       })
     }
   }, [initialData, isOpen])
@@ -146,6 +149,19 @@ export const PersonelFormModal = ({
                 <Calendar size={16} /> Kadro ve Terfi Bilgileri
               </h3>
               <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-3">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase block mb-1">
+                    İşe Giriş Tarihi
+                  </label>
+                  <input
+                    type="date"
+                    name="ise_giris_tarihi"
+                    value={form.ise_giris_tarihi}
+                    onChange={handleChange}
+                    className="w-full border px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-indigo-100 outline-none border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
                 <div>
                   <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase block mb-1">
                     Derece

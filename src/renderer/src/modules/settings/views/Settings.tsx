@@ -1,19 +1,21 @@
 import { useState } from 'react'
-import { Settings as SettingsIcon, Info, Monitor, Receipt } from 'lucide-react'
+import { Settings as SettingsIcon, Info, Monitor, Receipt, User } from 'lucide-react'
 import { GeneralSettings } from './GeneralSettings'
 import { HarcamaSettings } from './HarcamaSettings'
 import { AboutSettings } from './AboutSettings'
 import { ArsivSettings } from './ArsivSettings'
 import { KurumSettings } from './KurumSettings'
 import { EgitimSettings } from './EgitimSettings'
+import { ProfileSettings } from './ProfileSettings'
 import { Archive, Building2, GraduationCap } from 'lucide-react'
 
 export const Settings = () => {
   const [activeTab, setActiveTab] = useState<
-    'general' | 'harcama' | 'about' | 'arsiv' | 'kurum' | 'egitim'
+    'general' | 'harcama' | 'about' | 'arsiv' | 'kurum' | 'egitim' | 'profile'
   >('general')
 
   const tabs = [
+    { id: 'profile', label: 'Profil Ayarları', icon: User },
     { id: 'general', label: 'Genel Ayarlar', icon: Monitor },
     { id: 'harcama', label: 'Personel Harcama', icon: Receipt },
     { id: 'kurum', label: 'Kurum Tanımları', icon: Building2 },
@@ -23,7 +25,7 @@ export const Settings = () => {
   ]
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden transition-colors">
+    <div className="flex h-full bg-gray-50 dark:bg-gray-900 overflow-hidden transition-colors">
       {/* Sidebar - Settings Menu */}
       <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-shrink-0 flex flex-col transition-colors">
         <div className="p-6 border-b border-gray-100 dark:border-gray-700">
@@ -39,11 +41,10 @@ export const Settings = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all text-left ${
-                  activeTab === tab.id
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all text-left ${activeTab === tab.id
                     ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 shadow-sm ring-1 ring-blue-200 dark:ring-blue-800'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
+                  }`}
               >
                 <Icon size={18} />
                 {tab.label}
@@ -70,6 +71,7 @@ export const Settings = () => {
             {tabs.find((t) => t.id === activeTab)?.label}
           </h1>
 
+          {activeTab === 'profile' && <ProfileSettings />}
           {activeTab === 'general' && <GeneralSettings />}
           {activeTab === 'harcama' && <HarcamaSettings />}
           {activeTab === 'kurum' && <KurumSettings />}

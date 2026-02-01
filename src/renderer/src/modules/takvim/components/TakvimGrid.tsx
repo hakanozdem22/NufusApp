@@ -1,4 +1,4 @@
-import { Paperclip } from 'lucide-react'
+import { Paperclip, Trash2 } from 'lucide-react'
 import { GUNLER, TakvimEtkinlik } from '../models/takvim-types'
 
 interface TakvimGridProps {
@@ -9,6 +9,7 @@ interface TakvimGridProps {
   dbEtkinlikler: TakvimEtkinlik[]
   resmiTatiller: TakvimEtkinlik[]
   onDayClick: (gun: number) => void
+  onDelete: (id: number) => void
 }
 
 export const TakvimGrid = ({
@@ -18,7 +19,8 @@ export const TakvimGrid = ({
   baslangicBosluk,
   dbEtkinlikler,
   resmiTatiller,
-  onDayClick
+  onDayClick,
+  onDelete
 }: TakvimGridProps) => {
   return (
     <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
@@ -74,11 +76,23 @@ export const TakvimGrid = ({
                   return (
                     <div
                       key={etkinlik.id || `temp-${idx}`}
-                      className={`text-[10px] px-1.5 py-0.5 rounded border truncate flex items-center gap-1 ${isResmi ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800 font-bold' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'}`}
+                      className={`text-[10px] px-1.5 py-0.5 rounded border truncate flex items-center gap-1 group/item relative pr-4
+                      ${isResmi ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800 font-bold' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'}`}
                       title={etkinlik.baslik}
                     >
                       {etkinlik.dosya_yolu && <Paperclip size={10} className="shrink-0" />}
-                      {etkinlik.baslik}
+                      <span className="truncate">{etkinlik.baslik}</span>
+                      {!isResmi && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (etkinlik.id) onDelete(etkinlik.id as number)
+                          }}
+                          className="absolute right-0.5 top-0.5 p-0.5 text-red-500 hover:bg-red-200 dark:hover:bg-red-900/50 rounded opacity-0 group-hover/item:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={10} />
+                        </button>
+                      )}
                     </div>
                   )
                 })}

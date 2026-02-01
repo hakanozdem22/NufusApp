@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ElectronAPI } from '@electron-toolkit/preload'
 
 declare global {
@@ -62,6 +63,11 @@ declare global {
       getEgitimPlanDetay: (id: number) => Promise<any>
 
       createPdfTerfi: (data: any) => Promise<any>
+      // Pencere Kontrolleri
+      minimizeWindow: () => void
+      maximizeWindow: () => void
+      closeWindow: () => void
+
       [key: string]: any // Bilinmeyen diğer fonksiyonlar için esneklik
     }
   }

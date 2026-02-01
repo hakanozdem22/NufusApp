@@ -5,6 +5,7 @@ export interface TebdilUlke {
   site_url: string
   aciklama: string
   konvansiyon?: 'VIYANA_1968' | 'CENEVRE_1949' | 'IKILI_ANLASMA'
+  dosya_sayisi?: number
 }
 
 export interface TebdilDosya {

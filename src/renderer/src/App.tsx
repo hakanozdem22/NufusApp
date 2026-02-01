@@ -15,11 +15,25 @@ import { Takvim } from './modules/takvim/views/Takvim'
 import { Arsiv } from './modules/arsiv/views/Arsiv'
 import { EApostil } from './modules/e_apostil/views/EApostil'
 import { Tebdil } from './modules/tebdil/views/Tebdil'
+import { SurucuBelgesiDashboard } from './modules/surucu_belgesi/views/SurucuBelgesiDashboard'
+import { PersonelIsleriDashboard } from './modules/personel_isleri/views/PersonelIsleriDashboard'
 import { Settings } from './modules/settings/views/Settings'
 
 import { ThemeProvider } from './shared/context/ThemeContext'
+import { useState } from 'react'
+import { Login } from './modules/auth/Login'
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+
+  const handleLogin = (): void => {
+    setIsAuthenticated(true)
+  }
+
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} />
+  }
+
   return (
     <ThemeProvider>
       <HashRouter>
@@ -37,6 +51,8 @@ function App() {
             <Route path="/arsiv" element={<Arsiv />} />
             <Route path="/e-apostil" element={<EApostil />} />
             <Route path="/tebdil" element={<Tebdil />} />
+            <Route path="/personel-isleri" element={<PersonelIsleriDashboard />} />
+            <Route path="/surucu-belgesi" element={<SurucuBelgesiDashboard />} />
 
             <Route path="/ayarlar" element={<Settings />} />
             <Route path="*" element={<Dashboard />} />

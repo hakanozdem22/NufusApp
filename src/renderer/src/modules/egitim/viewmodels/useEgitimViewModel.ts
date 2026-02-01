@@ -5,11 +5,13 @@ export const useEgitimViewModel = () => {
   // --- STATE ---
   const [konular, setKonular] = useState<EgitimKonu[]>([])
   const [personelListesi, setPersonelListesi] = useState<PersonelBasic[]>([])
+  const [duzenleyenler, setDuzenleyenler] = useState<PersonelBasic[]>([]) // YENİ
   const [kayitliPlanlar, setKayitliPlanlar] = useState<EgitimPlan[]>([])
 
   // Ayarlar
   const [tarih, setTarih] = useState(new Date().toISOString().split('T')[0])
   const [seciliEgitici, setSeciliEgitici] = useState('')
+  const [seciliDuzenleyen, setSeciliDuzenleyen] = useState('') // YENİ
   const [saatHedefi, setSaatHedefi] = useState('100')
   const [sabahOturum, setSabahOturum] = useState('08:30 - 11:00')
   const [ogleOturum, setOgleOturum] = useState('13:30 - 16:00')
@@ -84,11 +86,13 @@ export const useEgitimViewModel = () => {
         const k = await window.api.getEgitimKonular()
         const p = await window.api.getEgitimPlanlar()
         const pers = await window.api.getEgitimEgiticiler() // Sadece eğiticileri getir
+        const duz = await window.api.getEgitimDuzenleyenler() // Düzenleyenleri getir
 
         if (Array.isArray(k)) setKonular(k)
 
         setKayitliPlanlar(p || [])
         setPersonelListesi(pers || [])
+        setDuzenleyenler(duz || [])
       }
     } catch (e) {
       console.error(e)
@@ -113,6 +117,29 @@ export const useEgitimViewModel = () => {
     else setZorunluDersler([...zorunluDersler, baslik])
   }
 
+  // YARDIMCI: Saat Aralığından Süre Hesapla (Örn: "08:30 - 11:00" -> 2.5)
+  const calculateDuration = (timeStr: string): number => {
+    try {
+      if (!timeStr || !timeStr.includes('-')) return 3 // Varsayılan
+      const parts = timeStr.split('-')
+      if (parts.length !== 2) return 3
+
+      const [startStr, endStr] = parts
+      const [startH, startM] = startStr.trim().split(':').map(Number)
+      const [endH, endM] = endStr.trim().split(':').map(Number)
+
+      const startTotal = startH * 60 + startM
+      const endTotal = endH * 60 + endM
+
+      const diffMinutes = endTotal - startTotal
+      return diffMinutes > 0 ? diffMinutes / 60 : 3
+    } catch {
+      return 3
+    }
+  }
+
+  // ...
+
   const robotCalistir = () => {
     if (!seciliEgitici) return mesajGoster('Lütfen önce eğitici seçiniz!', 'hata')
     const currentDate = new Date(tarih)
@@ -120,7 +147,8 @@ export const useEgitimViewModel = () => {
     const targetHours = parseInt(saatHedefi) || 100
     const newSchedule: EgitimDers[] = []
 
-    const egiticiObj = personelListesi.find((p) => p.id == parseInt(seciliEgitici))
+    // ID karşılaştırması string güvenli olsun
+    const egiticiObj = personelListesi.find((p) => String(p.id) === String(seciliEgitici))
     const egiticiAd = egiticiObj
       ? `${egiticiObj.ad_soyad} ${egiticiObj.unvan ? ' - ' + egiticiObj.unvan : ''}`
       : 'Bilinmiyor'
@@ -131,19 +159,24 @@ export const useEgitimViewModel = () => {
     const adayKonular = konular.filter((k) => !zorunluDersler.includes(k.baslik))
 
     // 2. KAÇ DERS LAZIM?
-    const gunlukSaat = 6
+    // Günlük saati de dinamik hesapla
+    const sabahSure = calculateDuration(sabahOturum)
+    const ogleSure = calculateDuration(ogleOturum)
+    const gunlukSaat = sabahSure + ogleSure
+    
     const hedefSaatInt = parseInt(saatHedefi) || 100
-    const toplamDersSayisi = Math.ceil(hedefSaatInt / gunlukSaat)
-
-    // Eksik kalan kısım kadar rastgele seç
-    const gerekenEkDers = Math.max(0, toplamDersSayisi - zorunluKonuObjeleri.length)
+    const toplamDersSayisi = Math.ceil(hedefSaatInt / gunlukSaat) * 2 // Kabaca her oturum 1 ders sayılırsa
+    
+    // Eksik kalan kısım kadar rastgele seç (Basit yaklaşım: Hedef / (Sabah+Öğle Ortalaması))
+    // Konu sayısı hesabı biraz karmaşıklaşıyor ama yaklaşık bir değer yeterli
+    const approximateLessonCount = Math.ceil(targetHours / 3) 
+    const gerekenEkDers = Math.max(0, approximateLessonCount - zorunluKonuObjeleri.length)
 
     // 3. KARIŞIK SEÇ (Shuffle)
     const karisikAdaylar = [...adayKonular].sort(() => 0.5 - Math.random())
     const eklenenler = karisikAdaylar.slice(0, gerekenEkDers)
 
     // 4. BİRLEŞTİR VE ID'YE GÖRE SIRALA
-    // "seçtiğim zorunlu ders de olsun ... karışık seçip id sine göre sıralasın"
     const birlesikHavuz = [...zorunluKonuObjeleri, ...eklenenler]
     const siraliHavuz = birlesikHavuz.sort(dersSiralama).map((k) => k.baslik)
 
@@ -167,7 +200,7 @@ export const useEgitimViewModel = () => {
         saat: sabahOturum,
         zorunlu: false
       })
-      totalHours += 3
+      totalHours += calculateDuration(sabahOturum)
 
       // Öğle Grubu (Aynı Konu)
       newSchedule.push({
@@ -177,18 +210,18 @@ export const useEgitimViewModel = () => {
         saat: ogleOturum,
         zorunlu: false
       })
-      totalHours += 3
+      totalHours += calculateDuration(ogleOturum)
 
       subjectIdx++ // Sıradaki konu (ID sıralı listeden)
       currentDate.setDate(currentDate.getDate() + 1)
     }
     setTaslak(newSchedule)
-    mesajGoster('Taslak plan oluşturuldu.')
+    mesajGoster(`Taslak plan oluşturuldu. Tahmini Toplam: ${totalHours.toFixed(1)} Saat`)
   }
 
   const manuelEkle = () => {
     if (!manKonu || !seciliEgitici) return mesajGoster('Lütfen konu ve eğitici seçiniz!', 'hata')
-    const egiticiObj = personelListesi.find((p) => p.id == parseInt(seciliEgitici))
+    const egiticiObj = personelListesi.find((p) => String(p.id) === String(seciliEgitici))
     const egiticiAd = egiticiObj
       ? `${egiticiObj.ad_soyad} ${egiticiObj.unvan ? ' - ' + egiticiObj.unvan : ''}`
       : ''
@@ -263,12 +296,26 @@ export const useEgitimViewModel = () => {
         const raporData = {
           program_adi: detay.plan.adi,
           dersler: detay.dersler,
-          personeller: detay.personeller
+          personeller: detay.personeller,
+          duzenleyen:
+            duzenleyenler.find((d) => String(d.id) === String(seciliDuzenleyen)) || null // YENİ: Rapora ekle
         }
 
         if (tip === 'NORMAL') {
-          await window.api.createPdfEgitim(raporData)
-          mesajGoster('İmza Çizelgesi (Yerel) oluşturuldu.')
+          const resultStr = await window.api.createPdfEgitim(raporData)
+          let result
+          try {
+            result = JSON.parse(resultStr)
+          } catch {
+            result = { success: false, error: 'PDF oluşturma yanıtı geçersiz.' }
+          }
+
+          if (result.success) {
+            mesajGoster('İmza Çizelgesi (Yerel) oluşturuldu.')
+          } else {
+            console.error(result.error)
+            mesajGoster(`HATA: ${result.error}`, 'hata')
+          }
         } else {
           const googleData = { tip: tip, veri: raporData }
           const sonucStr = await window.api.createGoogleReport(googleData)
@@ -313,11 +360,14 @@ export const useEgitimViewModel = () => {
   return {
     konular,
     personelListesi,
+    duzenleyenler,
     kayitliPlanlar,
     tarih,
     setTarih,
     seciliEgitici,
     setSeciliEgitici,
+    seciliDuzenleyen,
+    setSeciliDuzenleyen,
     saatHedefi,
     setSaatHedefi,
     sabahOturum,

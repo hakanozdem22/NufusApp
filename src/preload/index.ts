@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
@@ -26,6 +27,10 @@ const api = {
   getArsivTanimlar: () => ipcRenderer.invoke('get-arsiv-tanimlar'),
   addArsivTanim: (ad: string) => ipcRenderer.invoke('add-arsiv-tanim', ad),
   deleteArsivTanim: (id: number) => ipcRenderer.invoke('delete-arsiv-tanim', id),
+  // Arşiv İmha Komisyonu
+  getArsivImhaKomisyonu: () => ipcRenderer.invoke('get-arsiv-imha-komisyonu'),
+  addArsivImhaKomisyonu: (data: any) => ipcRenderer.invoke('add-arsiv-imha-komisyonu', data),
+  deleteArsivImhaKomisyonu: (id: number) => ipcRenderer.invoke('delete-arsiv-imha-komisyonu', id),
 
   // E-Apostil
   getEApostil: () => ipcRenderer.invoke('get-eapostil'),
@@ -105,6 +110,11 @@ const api = {
   deleteEgitimPersonel: (id: number) => ipcRenderer.invoke('delete-egitim-personel', id),
   updateEgitimPersonel: (data: any) => ipcRenderer.invoke('update-egitim-personel', data),
 
+  getEgitimDuzenleyenler: () => ipcRenderer.invoke('get-egitim-duzenleyenler'),
+  addEgitimDuzenleyen: (data: any) => ipcRenderer.invoke('add-egitim-duzenleyen', data),
+  updateEgitimDuzenleyen: (data: any) => ipcRenderer.invoke('update-egitim-duzenleyen', data),
+  deleteEgitimDuzenleyen: (id: number) => ipcRenderer.invoke('delete-egitim-duzenleyen', id),
+
   getEgitimPlanlar: () => ipcRenderer.invoke('get-egitim-planlar'),
   saveEgitimPlan: (data: any) => ipcRenderer.invoke('save-egitim-plan', data),
   deleteEgitimPlan: (id: number) => ipcRenderer.invoke('delete-egitim-plan', id),
@@ -117,10 +127,17 @@ const api = {
   createPdfTerfi: (data: any) => ipcRenderer.invoke('create-pdf-terfi', data),
 
   createPdfHarcama: (data: any) => ipcRenderer.invoke('create-pdf-harcama', data),
+  saveZimmetPdf: (buffer: ArrayBuffer) => ipcRenderer.invoke('save-zimmet-pdf', buffer),
   createPdfPython: (data: any) => ipcRenderer.invoke('create-pdf-python', data),
   createPdfResmiYazi: (data: any) => ipcRenderer.invoke('create-pdf-resmi-yazi', data),
   createPdfEgitim: (data: any) => ipcRenderer.invoke('create-pdf-egitim', data),
-  createGoogleReport: (data: any) => ipcRenderer.invoke('create-google-report', data)
+  createGoogleReport: (data: any) => ipcRenderer.invoke('create-google-report', data),
+  savePdf: (buffer: ArrayBuffer, prefix?: string) => ipcRenderer.invoke('save-pdf', { buffer, prefix }),
+
+  // Pencere Kontrolleri
+  minimizeWindow: () => ipcRenderer.send('window-minimize'),
+  maximizeWindow: () => ipcRenderer.send('window-maximize'),
+  closeWindow: () => ipcRenderer.send('window-close')
 }
 
 if (process.contextIsolated) {

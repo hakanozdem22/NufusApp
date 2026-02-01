@@ -20,7 +20,7 @@ def create_pdf(data_json):
         personeller = input_data.get('personeller', [])
         program_adi = input_data.get('program_adi', 'Eğitim Programı')
         
-        desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+        desktop = os.path.join(os.path.expanduser("~"), 'Desktop')
         tarih_str = datetime.datetime.now().strftime('%d-%m-%Y_%H-%M-%S')
         dosya_adi = f"Egitim_Plani_{tarih_str}.pdf"
         dosya_yolu = os.path.join(desktop, dosya_adi)
@@ -119,7 +119,26 @@ def create_pdf(data_json):
                     ""
                 ])
 
-            col_widths = [15*mm, 70*mm, 40*mm, 25*mm, 25*mm, 60*mm, 30*mm]
+            # A4 Landscape Width = ~297mm. Left/Right Margin = 15mm. Usable = 267mm.
+            # Current Total: 15+70+40+25+25+60+30 = 265mm. (Close enough)
+            # User wants it to "cover the page". Let's stretch slightly.
+            # New Weights:
+            # S.NO: 15
+            # KONU: 80 (+10)
+            # EĞİTİCİ: 45 (+5)
+            # TARİH: 26 (+1)
+            # SAAT: 26 (+1)
+            # KATILIMCI: 65 (+5)
+            # İMZA: 35 (+5)
+            # Total: 292mm (This might be too wide for 15mm margins, let's reduce margins to 10mm)
+            
+            # Re-init doc with smaller margins if needed, but simpleDocTemplate is already created.
+            # Let's stick to ~275mm total width and reduce margins slightly in code above if possible,
+            # or just optimize widths for 267mm available space.
+            # Let's use: 15, 75, 42, 25, 25, 60, 30 = 272mm (needs 12.5mm margins)
+            
+            col_widths = [12*mm, 78*mm, 45*mm, 25*mm, 25*mm, 55*mm, 30*mm] # Sum=270mm
+            
             t = Table(table_data, colWidths=col_widths, repeatRows=1)
             
             ts = TableStyle([
@@ -128,7 +147,10 @@ def create_pdf(data_json):
                 ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
                 ('ALIGN', (0,0), (-1,-1), 'LEFT'),
                 ('LEFTPADDING', (0,0), (-1,-1), 4),
-                ('RIGHTPADDING', (0,0), (-1,-1), 4)
+                ('RIGHTPADDING', (0,0), (-1,-1), 4),
+                ('TOPPADDING', (0,0), (-1,-1), 8), # Biraz kısalım ki taşmasın
+                ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+                ('FONTSIZE', (0,0), (-1,-1), 9), 
             ])
             
             for col_idx in [0, 1, 2, 3, 4]:
@@ -148,8 +170,11 @@ def create_pdf(data_json):
             t.setStyle(ts)
             elements.append(t)
             
-            # İMZA BÖLÜMÜ (SOL ALT)
-            # O günkü benzersiz eğiticileri bul
+            # İMZA BÖLÜMÜ (EN ALTTA)
+            # Kullanıcı "alta eğiticinin imzası olacak şekilde" dedi.
+            # Tablodan sonra boşluk bırakıp sağa veya ortaya hizalayalım.
+            # Sayfa sonuna itmek için TopPad kullanabiliriz ama basitçe Spacer verelim.
+            
             unique_egiticiler = []
             seen_egiticiler = set()
             for d in gunluk_dersler:
@@ -159,49 +184,62 @@ def create_pdf(data_json):
                     unique_egiticiler.append(e)
             
             if unique_egiticiler:
-                elements.append(Spacer(1, 10*mm))
+                elements.append(Spacer(1, 5*mm)) # Boşluğu azalttık (15->5)
                 
-                # Her eğitici için bir imza bloğu oluştur
                 sig_data = []
-                # Başlık Satırı
-                
                 for egitici in unique_egiticiler:
                     parts = egitici.split(" - ") if " - " in egitici else [egitici, ""]
                     ad = parts[0]
                     unvan = parts[1] if len(parts) > 1 else ""
                     
-                    # Blok İçeriği: Başlık, Ad, Unvan, İmza Çizgisi
-                    # Kullanıcı isteği: "sağ kısımda olsun eğitici yazmasına gerek yok"
-                    
                     sub_table_data = [
                         [Paragraph(f"<b>{ad}</b>", s_body_c)],
                         [Paragraph(f"<i>{unvan}</i>", s_body_c)],
-                        [Paragraph("<br/><br/>.............................................", s_body_c)]
+                        [Paragraph("<br/><br/>.............................................", s_body_c)],
+                        [Paragraph("İmza", s_body_c)]
                     ]
                     
-                    t_sig = Table(sub_table_data, colWidths=[60*mm])
+                    t_sig = Table(sub_table_data, colWidths=[50*mm])
                     t_sig.setStyle(TableStyle([
                         ('ALIGN', (0,0), (-1,-1), 'CENTER'),
                         ('VALIGN', (0,0), (-1,-1), 'TOP'),
-                        ('LEFTPADDING', (0,0), (-1,-1), 0),
                     ]))
                     sig_data.append(t_sig)
                 
-                # Sağ tarafa yasla
-                container_data = [sig_data]
-                t_container = Table(container_data, colWidths=[70*mm] * len(sig_data))
+                # İmzaları yan yana diz, ama sayfa genişliğine yayarak
+                # Eğer tek kişi ise ortala veya sağa? Genelde sağ alt olur veya orta alt.
+                # Kullanıcı "alta eğiticinin imzası" dedi.
+                
+                # Container table
+                # İmzalar arası boşluk için boş sütunlar ekleyebiliriz veya colWidths ayarlayabiliriz.
+                
+                container_row = []
+                container_widths = []
+                
+                # Ortalamak için:
+                # Toplam genişlik 270mm.
+                # N kişi var.
+                # Tek kişi ise: [Spacer, Sig, Spacer]
+                
+                if len(sig_data) == 1:
+                    container_row = [sig_data[0]]
+                    # Sağa yaslı olsun (genel kaide)
+                    container_data = [[Paragraph("", s_body_c), sig_data[0]]]
+                    t_container = Table(container_data, colWidths=[200*mm, 60*mm])
+                else:
+                    container_data = [sig_data]
+                    w = 270 / len(sig_data)
+                    container_widths = [w*mm for _ in sig_data]
+                    t_container = Table(container_data, colWidths=container_widths)
+
                 t_container.setStyle(TableStyle([
-                    ('ALIGN', (0,0), (-1,-1), 'RIGHT'), # SAĞA YASLA
+                    ('ALIGN', (0,0), (-1,-1), 'CENTER'),
                     ('VALIGN', (0,0), (-1,-1), 'TOP'),
                 ]))
-                # Sağa yaslamak için tablonun kendisinin de sağa hizalanması lazım (hAlignment) ama
-                # ReportLab Table flowable'da hAlign parametresi kullanılır.
-                t_container.hAlign = 'RIGHT'
                 
                 elements.append(t_container)
 
-            elements.append(Spacer(1, 10*mm))
-            if idx < len(tarihler) - 1: elements.append(PageBreak())
+            elements.append(PageBreak())
 
         doc.build(elements)
         os.startfile(dosya_yolu)

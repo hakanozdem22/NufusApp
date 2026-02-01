@@ -199,7 +199,13 @@ export const useTakvimViewModel = () => {
 
   // --- YAKLAŞAN ETKİNLİKLER HESAPLAMA ---
   const getYaklasanlar = () => {
-    const bugunStr = new Date().toISOString().split('T')[0]
+    const bugun = new Date()
+    const bugunStr = bugun.toISOString().split('T')[0]
+
+    // 15 gün sonrasını hesapla
+    const onBesGunSonra = new Date(bugun)
+    onBesGunSonra.setDate(bugun.getDate() + 15)
+    const onBesGunSonraStr = onBesGunSonra.toISOString().split('T')[0]
 
     // Tüm etkinlikleri birleştir (DB + Resmi)
     const tumEtkinlikler = [
@@ -207,11 +213,17 @@ export const useTakvimViewModel = () => {
       ...resmiTatiller
     ] as TakvimEtkinlik[]
 
-    // Bugünden sonrakileri filtrele ve sırala
+    // Filtreleme:
+    // 1. Resmi ve Dini tatilleri ÇIKAR (sadece görevler kalsın isteniyor yaklaşanlarda)
+    // 2. Tarih aralığı: Bugün ve önümüzdeki 15 gün
     return tumEtkinlikler
-      .filter((e) => e.tarih >= bugunStr)
+      .filter((e) => {
+        const isTatil = e.tur === 'RESMI' || e.tur === 'DINI'
+        const tarihUygun = e.tarih >= bugunStr && e.tarih <= onBesGunSonraStr
+        return !isTatil && tarihUygun
+      })
       .sort((a, b) => a.tarih.localeCompare(b.tarih))
-      .slice(0, 10) // İlk 10 tanesini al
+    // Slice kaldırıldı veya artırılabilir, 15 gün kuralı zaten sınırlıyor
   }
 
   const yaklasanlar = getYaklasanlar()

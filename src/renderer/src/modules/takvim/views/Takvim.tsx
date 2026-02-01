@@ -42,6 +42,7 @@ export const Takvim = () => {
           dbEtkinlikler={vm.dbEtkinlikler}
           resmiTatiller={vm.resmiTatiller}
           onDayClick={vm.gunTikla}
+          onDelete={vm.sil}
         />
 
         {/* SAĞ: YAKLAŞAN ETKİNLİKLER */}

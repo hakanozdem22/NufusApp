@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, createElement } from 'react'
+import { pdf } from '@react-pdf/renderer'
+import { ZimmetPdfDocument } from '../components/ZimmetPdfDocument'
 import { ZimmetKayit } from '../models/zimmet-types'
 
 export const usePostaZimmetViewModel = () => {
@@ -110,10 +112,34 @@ export const usePostaZimmetViewModel = () => {
       for (const item of liste) {
         await window.api.addZimmet({ ...item, tarih: bugunTam })
       }
-      await window.api.createPdfPython(liste)
+      // Python yerine React-PDF kullanıyoruz
+      try {
+        const doc = createElement(ZimmetPdfDocument, { liste }) as any
+        const blob = await pdf(doc).toBlob();
+        const buffer = await blob.arrayBuffer();
+
+        if (window.api && window.api.saveZimmetPdf) {
+          const res = await window.api.saveZimmetPdf(buffer)
+          if (res.success) {
+            mesajGoster('Kaydedildi ve PDF Masaüstüne oluşturuldu.', 'basari')
+          } else {
+            console.error(res.error)
+            mesajGoster('PDF Kaydedilemedi!', 'hata')
+          }
+        } else {
+          // Fallback
+          const url = URL.createObjectURL(blob)
+          window.open(url)
+          mesajGoster('Kaydedildi ve PDF açıldı.', 'basari')
+        }
+      } catch (pdfErr) {
+        console.error(pdfErr)
+        mesajGoster('PDF Oluşturma Hatası!', 'hata')
+      }
+
+      // Listeyi temizle ve arşivi güncelle
       setListe([])
       arsivGetir()
-      mesajGoster('Kaydedildi ve PDF oluşturuldu.', 'basari')
     } catch (e) {
       console.error(e)
       mesajGoster('İşlem sırasında hata oluştu.', 'hata')

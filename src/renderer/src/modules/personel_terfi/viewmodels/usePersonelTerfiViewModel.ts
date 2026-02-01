@@ -60,18 +60,11 @@ export const usePersonelTerfiViewModel = () => {
   const raporAl = async (): Promise<void> => {
     setYukleniyor(true)
     try {
-      let veri: Personel[] = []
-
-      // TERFI_LISTESI: Filtrelenmiş ve ekranda görünen (veya hak kazanan?) personeli yazdırır.
-      // Kullanıcı "Seçilenler" mantığını kaldırdığı için doğrudan listedeki herkesi veya terfi hak edenleri alabiliriz.
-      // Şimdilik filtrelenmiş listeyi baz alalım.
-      veri = filtrelenenler
+      let veri: Personel[] = filtrelenenler
 
       if (window.api) {
-        // Backend tarafında 'TERFI_LISTESI' tipini karşılayan logic olmalı, yoksa 'TERFI' olarak gönderip tüm listeyi mi verelim?
-        // Güvenli olması için 'TERFI' tipini kullanıp tüm listeyi gönderelim.
         const resultStr = await window.api.createPdfTerfi({
-          tip: 'TERFI', // Backend bu tipi biliyor
+          tip: 'TERFI',
           liste: veri
         })
 
@@ -85,7 +78,6 @@ export const usePersonelTerfiViewModel = () => {
           }
         } catch (err: any) {
           console.error('PDF Yanıt Hatası:', err)
-          // Eğer JSON değilse veya parse hatası ise
           if (err instanceof SyntaxError) {
             throw new Error('PDF motorundan geçersiz yanıt alındı.')
           }
@@ -94,7 +86,6 @@ export const usePersonelTerfiViewModel = () => {
       }
     } catch (e: any) {
       console.error('PDF Hatası:', e)
-      // Hata mesajını backend'den al veya varsayılan göster
       const errMsg = e.message || e.toString() || 'Yazdırma işlemi sırasında bir hata oluştu.'
       showToast('error', errMsg.includes('Python') ? 'Python motoru başlatılamadı.' : errMsg)
     } finally {

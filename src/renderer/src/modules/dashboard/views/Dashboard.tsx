@@ -37,16 +37,16 @@ export const Dashboard = () => {
 
         {/* 3. E-Apostil */}
         <DashboardCard
-          title="E-Apostil"
+          title="Apostil"
           desc="E-Apostil başvuru ve sorgulama"
           icon={Globe}
           colorClass="bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"
           path="/e-apostil"
         />
 
-        {/* 4. Personel Harcama */}
+        {/* 4. Harcama */}
         <DashboardCard
-          title="Personel Harcama"
+          title="Harcama"
           desc="Gelir, gider ve kasa takibi"
           icon={Wallet}
           colorClass="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
@@ -71,18 +71,18 @@ export const Dashboard = () => {
           path="/resmi-yazi"
         />
 
-        {/* 7. Eğitim Robotu */}
+        {/* 7. Hizmet İçi Eğitim */}
         <DashboardCard
-          title="Eğitim Robotu"
+          title="Hizmet İçi Eğitim"
           desc="Otomatik ders planlama"
           icon={GraduationCap}
           colorClass="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
           path="/egitim"
         />
 
-        {/* 8. Personel Terfi */}
+        {/* 8. Terfi */}
         <DashboardCard
-          title="Personel Terfi"
+          title="Terfi"
           desc="Derece, kademe ve terfi takibi"
           icon={UserCheck}
           colorClass="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
@@ -107,9 +107,9 @@ export const Dashboard = () => {
           path="/rehber"
         />
 
-        {/* 11. Tebdil (Ehliyet) */}
+        {/* 11. Tebdil */}
         <DashboardCard
-          title="Tebdil (Ehliyet)"
+          title="Tebdil"
           desc="Sürücü belgesi tebdil işlemleri"
           icon={Car}
           colorClass="bg-lime-50 dark:bg-lime-900/20 text-lime-600 dark:text-lime-400"

@@ -16,6 +16,35 @@ export const TerfiTable = ({
   onSelectOne,
   onEdit
 }: TerfiTableProps): React.ReactElement => {
+  // Çalışma süresi hesaplama fonksiyonu
+  const calculateDuration = (startDateStr?: string): string => {
+    if (!startDateStr) return '-'
+    const start = new Date(startDateStr)
+    const now = new Date()
+
+    let years = now.getFullYear() - start.getFullYear()
+    let months = now.getMonth() - start.getMonth()
+    let days = now.getDate() - start.getDate()
+
+    if (days < 0) {
+      months--
+      // Geçen ayın kaç gün çektiğini bul
+      const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+      days += lastMonth.getDate()
+    }
+    if (months < 0) {
+      years--
+      months += 12
+    }
+
+    const parts: string[] = []
+    if (years > 0) parts.push(`${years} Yıl`)
+    if (months > 0) parts.push(`${months} Ay`)
+    if (days > 0) parts.push(`${days} Gün`)
+
+    return parts.length > 0 ? parts.join(' ') : '0 Gün'
+  }
+
   return (
     <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden flex flex-col transition-colors">
       <div className="overflow-auto flex-1">
@@ -35,10 +64,12 @@ export const TerfiTable = ({
               <th className="p-3">Ad Soyad</th>
               <th className="p-3">Sicil No</th>
               <th className="p-3">Unvan</th>
-              <th className="p-3">Kadro</th>
-              <th className="p-3 text-center">Mevcut</th>
-              <th className="p-3 text-center">Sonraki</th>
+              <th className="p-3">İşe Giriş Tarihi</th>
+              <th className="p-3">Çalışma Süresi</th>
+              <th className="p-3 text-center">Ek Gösterge</th>
+              <th className="p-3 text-center">Derece/Kademe</th>
               <th className="p-3 text-center">Terfi Tarihi</th>
+              <th className="p-3 text-center">Sonraki Terfi</th>
               <th className="p-3 w-10"></th>
             </tr>
           </thead>
@@ -60,15 +91,25 @@ export const TerfiTable = ({
                   <td className="p-3 font-medium text-gray-800 dark:text-gray-200">{p.ad_soyad}</td>
                   <td className="p-3 text-gray-500 dark:text-gray-400">{p.sicil_no}</td>
                   <td className="p-3 text-gray-600 dark:text-gray-300">{p.unvan}</td>
-                  <td className="p-3 text-gray-600 dark:text-gray-300">{p.kadro}</td>
+                  <td className="p-3 text-gray-600 dark:text-gray-300">
+                    {p.ise_giris_tarihi
+                      ? new Date(p.ise_giris_tarihi).toLocaleDateString('tr-TR')
+                      : '-'}
+                  </td>
+                  <td className="p-3 text-gray-600 dark:text-gray-300 font-medium">
+                    {calculateDuration(p.ise_giris_tarihi)}
+                  </td>
+                  <td className="p-3 text-center text-gray-600 dark:text-gray-300">
+                    {p.ek_gosterge || '-'}
+                  </td>
                   <td className="p-3 text-center font-mono dark:text-gray-300">
                     {p.derece}/{p.kademe}
                   </td>
-                  <td className="p-3 text-center font-bold text-indigo-600 dark:text-indigo-400 font-mono">
-                    {p.sonraki_terfi ? new Date(p.sonraki_terfi).toLocaleDateString('tr-TR') : '-'}
-                  </td>
                   <td className="p-3 text-center text-gray-600 dark:text-gray-400">
                     {p.terfi_tarihi ? new Date(p.terfi_tarihi).toLocaleDateString('tr-TR') : '-'}
+                  </td>
+                  <td className="p-3 text-center font-bold text-indigo-600 dark:text-indigo-400 font-mono">
+                    {p.sonraki_terfi ? new Date(p.sonraki_terfi).toLocaleDateString('tr-TR') : '-'}
                   </td>
                   <td className="p-3 text-center">
                     <button

@@ -5,6 +5,10 @@ export const useArsivViewModel = () => {
   const [liste, setListe] = useState<ArsivKayit[]>([])
   const [filtreler, setFiltreler] = useState<ArsivFiltre>({ ad: '', yili: '', kodu: '' })
   const [klasorTanimlari, setKlasorTanimlari] = useState<any[]>([])
+  // const [personeller, setPersoneller] = useState<any[]>([]) // REMOVED
+  const [imhaKomisyonu, setImhaKomisyonu] = useState<
+    { id: number; ad_soyad: string; unvan: string; gorev: 'BASKAN' | 'UYE' }[]
+  >([])
 
   // Çoklu Seçim
   const [secilenler, setSecilenler] = useState<number[]>([])
@@ -58,6 +62,12 @@ export const useArsivViewModel = () => {
         setListe(data || [])
         const tanimlar = await window.api.getArsivTanimlar()
         setKlasorTanimlari(tanimlar || [])
+        // const personelData = await window.api.getPersoneller() // REMOVED: Yanlış liste
+        // setPersoneller(personelData || [])
+
+        // DOĞRU LİSTE: İmha Komisyonu
+        const komisyonData = await window.api.getArsivImhaKomisyonu()
+        setImhaKomisyonu(komisyonData || [])
       }
     } catch (e) {
       console.error(e)
@@ -237,10 +247,18 @@ export const useArsivViewModel = () => {
           }
         }
 
+        // Kaymakam bilgisini al
+        let kaymakamAdi = ''
+        try {
+          kaymakamAdi = await window.api.getSetting('kaymakam')
+        } catch (e) {
+          console.error('Kaymakam bilgisi alınamadı', e)
+        }
+
         const resStr = await window.api.createPdfArsiv({
           rapor_tipi: raporTipi,
           kayitlar: raporVerisi,
-          komisyon: komisyon
+          komisyon: { ...komisyon, kaymakam: kaymakamAdi }
         })
         const result = JSON.parse(resStr)
         if (result.success && result.path) {
@@ -298,6 +316,7 @@ export const useArsivViewModel = () => {
     silmeOnayla,
     yeniKayit,
     duzenle,
-    raporAl
+    raporAl,
+    imhaKomisyonu
   }
 }

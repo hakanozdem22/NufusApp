@@ -3,6 +3,7 @@ import { Personel } from '../../personel_terfi/models/personel-terfi-types'
 
 export const useSettingsViewModel = () => {
   const [username, setUsername] = useState('')
+  const [kaymakam, setKaymakam] = useState('')
   const [bildirim, setBildirim] = useState<{ mesaj: string; tur: 'basari' | 'hata' } | null>(null)
   const [yukleniyor, setYukleniyor] = useState(false)
   const [personeller, setPersoneller] = useState<Personel[]>([])
@@ -12,11 +13,27 @@ export const useSettingsViewModel = () => {
     setTimeout(() => setBildirim(null), 3000)
   }
 
+  /* PROFİL AYARLARI */
+  /* PROFİL AYARLARI */
+  const [profileImage, setProfileImage] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
+  const [nameSurname, setNameSurname] = useState<string>('')
+
   const ayarlariGetir = async () => {
     try {
       if (window.api) {
         const u = await window.api.getSetting('username')
         if (u) setUsername(u)
+        const k = await window.api.getSetting('kaymakam')
+        if (k) setKaymakam(k)
+
+        // Profil Ayarları
+        const img = await window.api.getSetting('profile_image')
+        if (img) setProfileImage(img)
+        const mail = await window.api.getSetting('recovery_email')
+        if (mail) setEmail(mail)
+        const ns = await window.api.getSetting('name_surname')
+        if (ns) setNameSurname(ns)
       }
     } catch (e) {
       console.error(e)
@@ -34,10 +51,24 @@ export const useSettingsViewModel = () => {
     }
   }
 
-  useEffect(() => {
-    ayarlariGetir()
-    personelleriGetir()
-  }, [])
+  const saveProfileSettings = async () => {
+    setYukleniyor(true)
+    try {
+      if (window.api) {
+        await window.api.setSetting('profile_image', profileImage)
+        await window.api.setSetting('recovery_email', email)
+        await window.api.setSetting('name_surname', nameSurname)
+        mesajGoster('Profil ayarları kaydedildi.')
+
+        // Event trigger to update other components immediately if needed
+        window.dispatchEvent(new Event('profile-updated'))
+      }
+    } catch {
+      mesajGoster('Hata oluştu.', 'hata')
+    } finally {
+      setYukleniyor(false)
+    }
+  }
 
   const kaydet = async (): Promise<void> => {
     if (!username) {
@@ -49,7 +80,27 @@ export const useSettingsViewModel = () => {
     try {
       if (window.api) {
         await window.api.setSetting('username', username)
+        await window.api.setSetting('kaymakam', kaymakam)
         mesajGoster('Ayarlar başarıyla kaydedildi.')
+      }
+    } catch {
+      mesajGoster('Kayıt sırasında hata oluştu.', 'hata')
+    } finally {
+      setYukleniyor(false)
+    }
+  }
+
+  const kaymakamKaydet = async (): Promise<void> => {
+    if (!kaymakam) {
+      mesajGoster('Kaymakam adı boş olamaz.', 'hata')
+      return
+    }
+
+    setYukleniyor(true)
+    try {
+      if (window.api) {
+        await window.api.setSetting('kaymakam', kaymakam)
+        mesajGoster('Kaymakam bilgisi kaydedildi.')
       }
     } catch {
       mesajGoster('Kayıt sırasında hata oluştu.', 'hata')
@@ -211,6 +262,9 @@ export const useSettingsViewModel = () => {
   const [egitimPersoneller, setEgitimPersoneller] = useState<
     { id: number; ad_soyad: string; unvan: string; cinsiyet: string; grup?: string }[]
   >([])
+  const [egitimDuzenleyenler, setEgitimDuzenleyenler] = useState<
+    { id: number; ad_soyad: string; unvan: string }[]
+  >([])
 
   const getEgitimData = async () => {
     try {
@@ -223,6 +277,9 @@ export const useSettingsViewModel = () => {
 
         const personeller = await window.api.getEgitimPersoneller()
         setEgitimPersoneller(personeller)
+
+        const duzenleyenler = await window.api.getEgitimDuzenleyenler()
+        setEgitimDuzenleyenler(duzenleyenler)
       }
     } catch {
       // sessiz
@@ -352,6 +409,45 @@ export const useSettingsViewModel = () => {
     }
   }
 
+  const duzenleyenEkle = async (ad: string, unvan: string) => {
+    if (!ad) return
+    try {
+      if (window.api) {
+        await window.api.addEgitimDuzenleyen({ ad, unvan })
+        mesajGoster('Düzenleyen eklendi.')
+        getEgitimData()
+      }
+    } catch {
+      mesajGoster('Hata oluştu.', 'hata')
+    }
+  }
+
+  const duzenleyenSil = async (id: number) => {
+    // UI'dan onay alınmalı
+    try {
+      if (window.api) {
+        await window.api.deleteEgitimDuzenleyen(id)
+        mesajGoster('Düzenleyen silindi.')
+        getEgitimData()
+      }
+    } catch {
+      mesajGoster('Silinemedi.', 'hata')
+    }
+  }
+
+  const duzenleyenGuncelle = async (id: number, ad: string, unvan: string) => {
+    if (!ad) return
+    try {
+      if (window.api) {
+        await window.api.updateEgitimDuzenleyen({ id, ad, unvan })
+        mesajGoster('Düzenleyen güncellendi.')
+        getEgitimData()
+      }
+    } catch {
+      mesajGoster('Güncellenemedi.', 'hata')
+    }
+  }
+
   useEffect(() => {
     ayarlariGetir()
     personelleriGetir()
@@ -364,9 +460,12 @@ export const useSettingsViewModel = () => {
   return {
     username,
     setUsername,
+    kaymakam,
+    setKaymakam,
     bildirim,
     yukleniyor,
     kaydet,
+    kaymakamKaydet,
     personeller,
     personelSil,
     // Arşiv
@@ -394,6 +493,19 @@ export const useSettingsViewModel = () => {
     egitimPersoneller,
     egitimPersonelEkle,
     egitimPersonelSil,
-    egitimPersonelGuncelle
+    egitimPersonelGuncelle,
+    egitimDuzenleyenler,
+    duzenleyenEkle,
+    duzenleyenSil,
+    duzenleyenGuncelle,
+
+    // Profil
+    profileImage,
+    setProfileImage,
+    email,
+    setEmail,
+    nameSurname,
+    setNameSurname,
+    saveProfileSettings
   }
 }

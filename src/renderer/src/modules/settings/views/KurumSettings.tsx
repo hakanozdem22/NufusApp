@@ -113,7 +113,7 @@ export const KurumSettings = () => {
             </div>
 
             <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transition-colors">
-              <div className="max-h-[400px] overflow-y-auto">
+              <div>
                 {filteredList.length === 0 ? (
                   <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                     {arama ? 'Sonuç bulunamadı.' : 'Henüz kurum eklenmemiş.'}
@@ -150,9 +150,8 @@ export const KurumSettings = () => {
 
       {bildirim && (
         <div
-          className={`fixed bottom-8 right-8 p-4 rounded-xl shadow-lg text-white animate-in slide-in-from-right duration-300 z-50 flex items-center gap-3 ${
-            bildirim.tur === 'hata' ? 'bg-red-600' : 'bg-green-600'
-          }`}
+          className={`fixed bottom-8 right-8 p-4 rounded-xl shadow-lg text-white animate-in slide-in-from-right duration-300 z-50 flex items-center gap-3 ${bildirim.tur === 'hata' ? 'bg-red-600' : 'bg-green-600'
+            }`}
         >
           <span>{bildirim.mesaj}</span>
         </div>

@@ -90,10 +90,13 @@ def run_process(data_json):
                 data_rows.append([clean_trainer])
 
             # Batch Update
+            # ÖNCE TEMİZLE (Eski konular kalmasın)
+            sheet.batch_clear(['B13:C150']) 
+
             updates = [
-                {'range': 'B5', 'values': [[program_adi]]},
-                {'range': 'B6', 'values': [[tarih_araligi]]},
-                {'range': 'B13', 'values': data_rows} # B13 başlangıç hücresi (Şablonunuza göre ayarlayın)
+                {'range': 'A5', 'values': [[f"Eğitimin Adı: {program_adi} "]]},
+                {'range': 'A6', 'values': [[f"Tarihi: {datetime.datetime.now().strftime('%d.%m.%Y')} "]]},
+                {'range': 'B13', 'values': data_rows} # B13 başlangıç hücresi
             ]
             sheet.batch_update(updates)
             target_sheet_id = SHEET_ID_EK2
@@ -112,11 +115,55 @@ def run_process(data_json):
             # Basit kod ayıklama (1.1, 2.3 vb.)
             codes = [s.split(" - ")[0] for s in subjects]
             
-            total_hours = len(dersler) * 3 # Varsayılan 3 saat
-            kadin = 0 # Veritabanından cinsiyet gelirse eklenebilir
-            erkek = len(personeller)
+            # Saat Hesaplama (Dinamik)
+            total_hours = 0.0
+            for d in dersler:
+                saat_str = d.get('saat', '')
+                try:
+                    if '-' in saat_str:
+                        start_str, end_str = saat_str.split('-')
+                        sh, sm = map(int, start_str.strip().split(':'))
+                        eh, em = map(int, end_str.strip().split(':'))
+                        start_min = sh * 60 + sm
+                        end_min = eh * 60 + em
+                        diff = end_min - start_min
+                        if diff > 0:
+                            total_hours += diff / 60.0
+                        else:
+                            total_hours += 3.0 # Hata/Terslik varsa varsayılan
+                    else:
+                        total_hours += 3.0 # Format uymazsa varsayılan
+                except:
+                    total_hours += 3.0 # Parse hatası olursa varsayılan
+            # Cinsiyet Sayımı
+            kadin = 0
+            erkek = 0
+            for p in personeller:
+                cns = p.get('cinsiyet', '').lower()
+                if cns == 'kadın' or cns == 'kadin':
+                    kadin += 1
+                else:
+                    erkek += 1
+            
             toplam_pers = kadin + erkek
             
+            # Düzenleyen ve Eğitici Bilgisi
+            duzenleyen = veri.get('duzenleyen', {})
+            duzenleyen_str = ""
+            if duzenleyen:
+                duzenleyen_str = f"{duzenleyen.get('ad_soyad', '')} \n {duzenleyen.get('unvan', '')}"
+            
+            # Eğitici bilgisini derslerden al (İlk dersin eğiticisi varsayılır)
+            egitici_str = ""
+            if dersler:
+                # Format: "Ad Soyad - Ünvan"
+                raw = dersler[0].get('egitici', '')
+                parts = raw.split(' - ')
+                if len(parts) > 1:
+                     egitici_str = f"{parts[0]} \n {parts[1]}"
+                else:
+                     egitici_str = raw
+
             tr_dates = [datetime.datetime.strptime(d, '%Y-%m-%d').strftime('%d.%m.%Y') for d in dates]
             tarih_araligi = f"{tr_dates[0]} - {tr_dates[-1]}" if dates else "-"
 
@@ -127,9 +174,12 @@ def run_process(data_json):
                 {'range': 'C11', 'values': [[", ".join(codes)]]},
                 {'range': 'D11', 'values': [[len(codes)]]},
                 {'range': 'E11', 'values': [[total_hours]]},
-                {'range': 'H11', 'values': [[toplam_pers]]},
-                {'range': 'I11', 'values': [[toplam_pers]]},
-                {'range': 'D20', 'values': [[datetime.datetime.now().strftime("%d.%m.%Y")]]}
+                {'range': 'F11', 'values': [[kadin]]},          # Kadın Sayısı
+                {'range': 'G11', 'values': [[toplam_pers]]},    # Toplam (K+E)
+                {'range': 'I11', 'values': [[toplam_pers]]},    # Başarılı Sayısı (Varsayılan hepsi)
+                {'range': 'A20', 'values': [[duzenleyen_str]]}, # Düzenleyen
+                {'range': 'D20', 'values': [[datetime.datetime.now().strftime("%d.%m.%Y")]]}, # Tarih
+                {'range': 'E20', 'values': [[egitici_str]]}     # Eğitici
             ]
             sheet.batch_update(updates)
             target_sheet_id = SHEET_ID_EK3

@@ -36,7 +36,7 @@ export const TakvimDetailModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[80] flex items-center justify-center backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[80vh]">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[80vh] relative">
         <div className="flex justify-end p-2 absolute top-0 right-0 z-10">
           <button
             onClick={onClose}

@@ -88,6 +88,7 @@ export const Arsiv = () => {
         komisyon={vm.komisyon}
         setKomisyon={vm.setKomisyon}
         yukleniyor={vm.yukleniyor}
+        imhaKomisyonu={vm.imhaKomisyonu}
       />
     </div>
   )

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from './firebaseConfig'
 import {
   collection,
@@ -18,15 +19,16 @@ import {
 // --- YARDIMCI FONSİYONLAR ---
 
 // Firestore verisini düzgün formatlamak için (id'yi objeye ekle)
-const formatDoc = (doc: any) => ({ id: doc.id, ...doc.data() })
+const formatDoc = (doc: any): any => ({ id: doc.id, ...doc.data() })
 
-export function initDatabase(userDataPath: string) {
+export async function initDatabase(userDataPath: string): Promise<void> {
   console.log('Firebase Firestore Kullanılıyor. Yerel veritabanı dosyası gerekmez:', userDataPath)
+  await seedEgitimKonular()
 }
 
 // --- HARCAMALAR ---
 
-export async function getHarcamalarByMonth(params: any) {
+export async function getHarcamalarByMonth(params: any): Promise<any[]> {
   const colRef = collection(db, 'harcamalar')
   let q
 
@@ -55,7 +57,7 @@ export async function getHarcamalarByMonth(params: any) {
   return snapshot.docs.map(formatDoc)
 }
 
-export async function getDevirBakiyesi(tarihBaslangic: string) {
+export async function getDevirBakiyesi(tarihBaslangic: string): Promise<number> {
   // Firestore'da SUM işlemi için aggregation query gerekir veya tümünü çekip toplanır.
   // Basitlik ve hız için şimdilik önceki tüm kayıtları çekip topluyoruz.
   // Performans sorunu olursa "Devir" diye ayrı bir koleksiyon tutulmalı.
@@ -75,7 +77,7 @@ export async function getDevirBakiyesi(tarihBaslangic: string) {
   return gelir - gider
 }
 
-export async function addHarcama(data: any) {
+export async function addHarcama(data: any): Promise<any> {
   const colRef = collection(db, 'harcamalar')
   const res = await addDoc(colRef, {
     baslik: data.baslik,
@@ -87,7 +89,7 @@ export async function addHarcama(data: any) {
   return { id: res.id, ...data }
 }
 
-export async function updateHarcama(data: any) {
+export async function updateHarcama(data: any): Promise<boolean> {
   const docRef = doc(db, 'harcamalar', data.id)
   await updateDoc(docRef, {
     baslik: data.baslik,
@@ -99,40 +101,43 @@ export async function updateHarcama(data: any) {
   return true
 }
 
-export async function deleteHarcama(id: string) {
+export async function deleteHarcama(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'harcamalar', id))
   return true
 }
 
 // --- HARCAMA AYARLARI (PERSONEL & GİZLENENLER) ---
 
-export async function getHarcamaPersonelleri() {
+export async function getHarcamaPersonelleri(): Promise<any[]> {
   const snapshot = await getDocs(
     query(collection(db, 'harcama_sabit_personeller'), orderBy('ad_soyad', 'asc'))
   )
   return snapshot.docs.map(formatDoc)
 }
 
-export async function getHarcamaSabitPersoneller() {
+export async function getHarcamaSabitPersoneller(): Promise<any[]> {
   return await getHarcamaPersonelleri()
 }
 
-export async function addHarcamaSabitPersonel(adSoyad: string) {
+export async function addHarcamaSabitPersonel(adSoyad: string): Promise<any> {
   const res = await addDoc(collection(db, 'harcama_sabit_personeller'), { ad_soyad: adSoyad })
   return { id: res.id, ad_soyad: adSoyad }
 }
 
-export async function deleteHarcamaSabitPersonel(id: string) {
+export async function deleteHarcamaSabitPersonel(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'harcama_sabit_personeller', id))
   return true
 }
 
-export async function addHarcamaYerelKisi(adSoyad: string) {
+export async function addHarcamaYerelKisi(adSoyad: string): Promise<any> {
   const res = await addDoc(collection(db, 'harcama_yerel_kisiler'), { ad_soyad: adSoyad })
   return { id: res.id, ad_soyad: adSoyad }
 }
 
-export async function deleteHarcamaGorunum(id: string, kaynak: 'GLOBAL' | 'YEREL') {
+export async function deleteHarcamaGorunum(
+  id: string,
+  kaynak: 'GLOBAL' | 'YEREL'
+): Promise<boolean> {
   if (kaynak === 'YEREL') {
     await deleteDoc(doc(db, 'harcama_yerel_kisiler', id))
   } else {
@@ -144,54 +149,54 @@ export async function deleteHarcamaGorunum(id: string, kaynak: 'GLOBAL' | 'YEREL
 
 // --- PERSONELLER ---
 
-export async function getPersoneller() {
+export async function getPersoneller(): Promise<any[]> {
   const snapshot = await getDocs(query(collection(db, 'personeller'), orderBy('ad_soyad', 'asc')))
   return snapshot.docs.map(formatDoc)
 }
 
-export async function addPersonel(data: any) {
+export async function addPersonel(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'personeller'), data)
   return { id: res.id, ...data }
 }
 
-export async function updatePersonel(data: any) {
+export async function updatePersonel(data: any): Promise<boolean> {
   const { id, ...updateData } = data
   await updateDoc(doc(db, 'personeller', id), updateData)
   return true
 }
 
-export async function deletePersonel(id: string) {
+export async function deletePersonel(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'personeller', id))
   return true
 }
 
 // --- REHBER ---
 
-export async function getRehber() {
+export async function getRehber(): Promise<any[]> {
   const snapshot = await getDocs(query(collection(db, 'rehber'), orderBy('ad_soyad', 'asc')))
   return snapshot.docs.map(formatDoc)
 }
 
-export async function addRehber(data: any) {
+export async function addRehber(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'rehber'), data)
   return { id: res.id, ...data }
 }
 
-export async function updateRehber(data: any) {
+export async function updateRehber(data: any): Promise<boolean> {
   const { id, ...updateData } = data
   await updateDoc(doc(db, 'rehber', id), updateData)
   return true
 }
 
-export async function deleteRehber(id: string) {
+export async function deleteRehber(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'rehber', id))
   return true
 }
 
 // --- ZIMMET ---
 
-export async function getZimmet(limitVal = 100) {
-  const q = query(collection(db, 'zimmet'), orderBy('id', 'desc'), limit(limitVal)) // ID sıralaması Firestore'da auto-id olduğu için tarih kullanılmalı
+export async function getZimmet(limitVal = 100): Promise<any[]> {
+  const q = query(collection(db, 'zimmet'), orderBy('createdAt', 'desc'), limit(limitVal)) // ID sıralaması Firestore'da auto-id olduğu için tarih kullanılmalı
   // Ancak mevcut yapıda ID'ye güvenilmiş. Firestore'da 'createdAt' alanı ekleyip ona göre sıralamak en doğrusu.
   // Migration sırasında mevcut veriye dokunmuyoruz ama yeni kayıtlarda tarih alanı zaten var.
   // Geçici olarak tarih'e göre sıralayalım:
@@ -201,7 +206,7 @@ export async function getZimmet(limitVal = 100) {
   return snapshot.docs.map(formatDoc)
 }
 
-export async function addZimmet(data: any) {
+export async function addZimmet(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'zimmet'), {
     ...data,
     durum: 'BEKLİYOR',
@@ -210,17 +215,17 @@ export async function addZimmet(data: any) {
   return { id: res.id, ...data }
 }
 
-export async function updateZimmetDurum(id: string, durum: string) {
+export async function updateZimmetDurum(id: string, durum: string): Promise<boolean> {
   await updateDoc(doc(db, 'zimmet', id), { durum })
   return true
 }
 
-export async function deleteZimmet(id: string) {
+export async function deleteZimmet(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'zimmet', id))
   return true
 }
 
-export async function searchZimmet(term: string) {
+export async function searchZimmet(term: string): Promise<any[]> {
   // Firestore'da "LIKE %Query%" sorgusu yoktur. Tam metin arama için Algolia vb. önerilir.
   // Basit çözüm: Client-side filtreleme veya "orderBy" ve "startAt" kullanma (sadece prefix araması yapar).
   // Şimdilik tümünü çekip JS ile filtreleyelim (Veri az varsayımıyla)
@@ -238,58 +243,160 @@ export async function searchZimmet(term: string) {
 
 // --- RESMİ YAZI (EVRAKLAR) ---
 
-export async function getEvraklar() {
+export async function getEvraklar(): Promise<any[]> {
   const snapshot = await getDocs(query(collection(db, 'evraklar'), orderBy('tarih', 'desc')))
   return snapshot.docs.map(formatDoc)
 }
 
-export async function addEvrak(data: any) {
+export async function addEvrak(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'evraklar'), data)
   return { id: res.id, ...data }
 }
 
-export async function updateEvrak(data: any) {
+export async function updateEvrak(data: any): Promise<boolean> {
   const { id, ...updateData } = data
   await updateDoc(doc(db, 'evraklar', id), updateData)
   return true
 }
 
-export async function deleteEvrak(id: string) {
+export async function deleteEvrak(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'evraklar', id))
   return true
 }
 
 // --- EĞİTİM ---
 
-export async function getEgitimKonular() {
+export async function getEgitimKonular(): Promise<any[]> {
   const snapshot = await getDocs(collection(db, 'egitim_konular'))
   // ID sıralaması yerine oluşturma sırası veya alfabetik
   return snapshot.docs.map(formatDoc).sort((a: any, b: any) => a.baslik?.localeCompare(b.baslik))
 }
 
-export async function addEgitimKonu(baslik: string) {
+export async function addEgitimKonu(baslik: string): Promise<any> {
   const res = await addDoc(collection(db, 'egitim_konular'), { baslik })
   return { id: res.id, baslik }
 }
 
-export async function deleteEgitimKonu(id: string) {
+export async function deleteEgitimKonu(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'egitim_konular', id))
   return true
 }
 
-export async function updateEgitimKonu(id: string, baslik: string) {
+export async function updateEgitimKonu(id: string, baslik: string): Promise<boolean> {
   await updateDoc(doc(db, 'egitim_konular', id), { baslik })
   return true
 }
 
-export async function getEgitimEgiticiler() {
+const EGITIM_KONULARI_LISTESI = [
+  '1.1 Anayasa ve Devlet Teşkilatı',
+  '1.2 Atatürk İlke ve İnkılapları',
+  '1.3 Terör, Bölücü ve Yıkıcı Faaliyetler',
+  '1.4 AB ve Uluslararası İlişkiler',
+  '1.5 Stratejik Plan Hazırlama ve Uygulama',
+  '1.6 İç Kontrol ve İç Denetim',
+  '1.7 Faaliyet Raporu Hazırlama',
+  '1.8 Devlet Malını Koruma ve Tasarruf Tedbirleri',
+  '1.9 Disiplin ve Ceza Soruşturması İşlemleri',
+  '1.10 Aile İçi ve Kadına Yönelik Şiddetin Önlenmesi',
+  '1.11 Kriz İletişim Yönetimi',
+  '2.1 1 sayılı Cumhurbaşkanlığı Teşkilatı Hakkında Cumhurbaşkanlığı Kararnamesi',
+  '2.2 657 sayılı Devlet Memurları Kanunu',
+  '2.3 4483 sayılı Memurlar ve Diğer Kamu Görevlilerinin Yargılanması Hakkında Kanun',
+  '2.4 2577 sayılı İdari Yargılama Usulü Kanunu',
+  '2.5 5018 sayılı Kamu Mali Yönetimi ve Kontrol Kanunu',
+  '2.6 6245 sayılı Harcırah Kanunu',
+  '2.7 4734 sayılı Kamu İhale Kanunu',
+  '2.8 4735 sayılı Kamu İhale Sözleşmeleri Kanunu',
+  '2.9 2886 sayılı Devlet İhale Kanunu',
+  '2.10 4857 sayılı İş Kanunu',
+  '2.11 5510 sayılı Sosyal Sigortalar ve Genel Sağlık Sigortası Kanunu',
+  '2.12 3628 sayılı Mal Bildiriminde Bulunulması, Rüşvet ve Yolsuzluklarla Mücadele Kanunu',
+  '2.13 3071 sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun, 4982 sayılı Bilgi Edinme Hakkı Kanunu ve Cumhurbaşkanlığı İletişim Merkezi (CİMER)',
+  '2.14 6698 sayılı Kişisel Verilerin Korunması Kanunu',
+  '2.15 7201 sayılı Tebligat Kanunu',
+  '2.16 Kamu Hizmetlerinin Sunumunda Uyulacak Usul ve Esaslara İlişkin Yönetmelik',
+  '2.17 Cumhurbaşkanlığı ve Bakanlık Genelgeleri',
+  '2.18 5442 sayılı İl İdaresi Kanunu',
+  '2.19 442 sayılı Köy Kanunu',
+  '2.20 5490 sayılı Nüfus Hizmetleri Kanunu',
+  '2.21 5901 sayılı Türk Vatandaşlığı Kanunu',
+  '2.22 5253 sayılı Dernekler Kanunu',
+  '2.23 2860 sayılı Yardım Toplama Kanunu',
+  '2.24 2911 sayılı Toplantı ve Gösteri Yürüyüşleri Kanunu',
+  '2.25 5326 sayılı Kabahatler Kanunu',
+  '2.26 3091 sayılı Taşınmaz Mal Zilyetliğine Yapılan Tecavüzlerin Önlenmesi Hakkında Kanun',
+  '2.27 5651 sayılı İnternet Ortamında Yapılan Yayınların Düzenlenmesi ve Bu Yayınlar Yoluyla İşlenen Suçlarla Mücadele Edilmesi Hakkında Kanun',
+  '2.28 6713 sayılı Kolluk Gözetim Komisyonu Kurulması Hakkında Kanun',
+  '2.29 Valilik ve Kaymakamlık Birimleri Teşkilat, Görev ve Çalışma Yönetmeliği',
+  '3.30 Görev alanı ile ilgili mevzuat',
+  '3.31 Mevzuatta meydana gelen değişiklikler',
+  '3. Protokol Kuralları Eğitimi Konuları',
+  '4. Halkla İlişkiler Eğitimi Konuları',
+  '5. Etkili Sunum Teknikleri Eğitimi Konuları',
+  '6. İnsan Kaynakları Yönetimi Eğitimi Konuları',
+  '7. Etkili Konuşma ve İletişim Becerileri Eğitimi Konuları',
+  '8. Kişisel Gelişim Eğitimi Konuları',
+  '9. Stres, Çatışma ve Öfke Yönetimi Eğitimi Konuları',
+  '10. Afet ve Kriz Yönetimi Eğitim Konuları',
+  '11. İç Kontrol ve İç Denetim Eğitimi Konuları',
+  '12. Mobbing Yönetimi Eğitimi Konuları',
+  '13. Sosyal Medya Eğitimi Konuları',
+  '14. İnsan Hakları Eğitimi Konuları',
+  '15. e-Devlet Uygulamaları Eğitimi Konuları',
+  '16. Kamuda Etik Davranış Eğitimi Konuları',
+  '17. Bağımlılık Yapıcı Maddeler ile Mücadele Eğitimi Konuları',
+  '18. Arşiv Hizmetleri Eğitimi Konuları',
+  '19. Koruyucu Güvenlik Eğitimi Konuları',
+  '20. İş Sağlığı ve İş Güvenliği Eğitimi Konuları',
+  '21. Proje Döngüsü Yönetimi Eğitimi Konuları',
+  "22. Yazım Kuralları ve Türkçe'nin Doğru Kullanımı Eğitimi Konuları",
+  '23. Resmi Yazışmalarda Uygulanacak Usul ve Esaslar Eğitimi Konuları',
+  '24. Kurumsal Bilgi Güvenliği Eğitimi Konuları',
+  '25. İlk Yardım Eğitimi Konuları (Uygulamalı)',
+  '26. Bilgisayar Eğitimi Konuları (Uygulamalı)',
+  '27. İçişleri e-Akademi (Uzaktan Eğitim) sistemi tarafından verilen eğitim konuları',
+  '28. Bakanlık ve valilik tarafından uygun görülen diğer konular'
+]
+
+async function seedEgitimKonular(): Promise<void> {
+  const SEED_KEY = 'egitim_konular_seeded_v3'
+  const isSeeded = await getSetting(SEED_KEY)
+
+  if (isSeeded === 'true') {
+    return
+  }
+
+  console.log('Eğitim konuları veritabanına ekleniyor...')
+  const batch = writeBatch(db)
+
+  // 1. Mevcut konuları sil
+  const snapshot = await getDocs(collection(db, 'egitim_konular'))
+  snapshot.forEach((d) => {
+    batch.delete(d.ref)
+  })
+
+  // 2. Yeni konuları ekle
+  EGITIM_KONULARI_LISTESI.forEach((konu) => {
+    const docRef = doc(collection(db, 'egitim_konular'))
+    batch.set(docRef, { baslik: konu })
+  })
+
+  // 3. Ayarı güncelle
+  const settingRef = doc(db, 'app_settings', SEED_KEY)
+  batch.set(settingRef, { value: 'true' })
+
+  await batch.commit()
+  console.log('Eğitim konuları başarıyla eklendi.')
+}
+
+export async function getEgitimEgiticiler(): Promise<any[]> {
   const snapshot = await getDocs(
     query(collection(db, 'egitim_egiticiler'), orderBy('ad_soyad', 'asc'))
   )
   return snapshot.docs.map(formatDoc)
 }
 
-export async function addEgitimEgitici(data: any) {
+export async function addEgitimEgitici(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'egitim_egiticiler'), {
     ad_soyad: data.ad,
     unvan: data.unvan
@@ -297,24 +404,24 @@ export async function addEgitimEgitici(data: any) {
   return { id: res.id, ...data }
 }
 
-export async function updateEgitimEgitici(data: any) {
+export async function updateEgitimEgitici(data: any): Promise<boolean> {
   await updateDoc(doc(db, 'egitim_egiticiler', data.id), { ad_soyad: data.ad, unvan: data.unvan })
   return true
 }
 
-export async function deleteEgitimEgitici(id: string) {
+export async function deleteEgitimEgitici(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'egitim_egiticiler', id))
   return true
 }
 
-export async function getEgitimPersoneller() {
+export async function getEgitimPersoneller(): Promise<any[]> {
   const snapshot = await getDocs(
     query(collection(db, 'egitim_personeller'), orderBy('ad_soyad', 'asc'))
   )
   return snapshot.docs.map(formatDoc)
 }
 
-export async function addEgitimPersonel(data: any) {
+export async function addEgitimPersonel(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'egitim_personeller'), {
     ad_soyad: data.ad,
     unvan: data.unvan,
@@ -324,7 +431,7 @@ export async function addEgitimPersonel(data: any) {
   return { id: res.id, ...data }
 }
 
-export async function updateEgitimPersonel(data: any) {
+export async function updateEgitimPersonel(data: any): Promise<boolean> {
   await updateDoc(doc(db, 'egitim_personeller', data.id), {
     ad_soyad: data.ad,
     unvan: data.unvan,
@@ -334,22 +441,52 @@ export async function updateEgitimPersonel(data: any) {
   return true
 }
 
-export async function deleteEgitimPersonel(id: string) {
+export async function deleteEgitimPersonel(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'egitim_personeller', id))
+  return true
+}
+
+// --- EĞİTİM DÜZENLEYENLER ---
+
+export async function getEgitimDuzenleyenler(): Promise<any[]> {
+  const snapshot = await getDocs(
+    query(collection(db, 'egitim_duzenleyenler'), orderBy('ad_soyad', 'asc'))
+  )
+  return snapshot.docs.map(formatDoc)
+}
+
+export async function addEgitimDuzenleyen(data: any): Promise<any> {
+  const res = await addDoc(collection(db, 'egitim_duzenleyenler'), {
+    ad_soyad: data.ad,
+    unvan: data.unvan
+  })
+  return { id: res.id, ...data }
+}
+
+export async function updateEgitimDuzenleyen(data: any): Promise<boolean> {
+  await updateDoc(doc(db, 'egitim_duzenleyenler', data.id), {
+    ad_soyad: data.ad,
+    unvan: data.unvan
+  })
+  return true
+}
+
+export async function deleteEgitimDuzenleyen(id: string): Promise<boolean> {
+  await deleteDoc(doc(db, 'egitim_duzenleyenler', id))
   return true
 }
 
 // Planlar ve Dersler (İlişkisel Yapı -> Alt Koleksiyon veya Referans)
 // Basitlik için: Plan dokümanı içinde dersleri array olarak tutabiliriz
 // VEYA egitim_dersler diye ayrı koleksiyon yapıp plan_id ile sorgularız.
-export async function getEgitimPlanlar() {
+export async function getEgitimPlanlar(): Promise<any[]> {
   const snapshot = await getDocs(
     query(collection(db, 'egitim_planlar'), orderBy('olusturma_tarihi', 'desc'))
   )
   return snapshot.docs.map(formatDoc)
 }
 
-export async function saveEgitimPlan(data: any) {
+export async function saveEgitimPlan(data: any): Promise<boolean> {
   const batch = writeBatch(db)
 
   // Planı oluştur
@@ -372,7 +509,7 @@ export async function saveEgitimPlan(data: any) {
   return true
 }
 
-export async function deleteEgitimPlan(id: string) {
+export async function deleteEgitimPlan(id: string): Promise<boolean> {
   // Önce dersleri sil
   const derslerQ = query(collection(db, 'egitim_dersler'), where('plan_id', '==', id))
   const derslerSnap = await getDocs(derslerQ)
@@ -387,18 +524,18 @@ export async function deleteEgitimPlan(id: string) {
   return true
 }
 
-export async function getEgitimPlanDetay(planId: string) {
+export async function getEgitimPlanDetay(planId: string): Promise<any> {
   const planDoc = await getDoc(doc(db, 'egitim_planlar', planId))
   const plan = formatDoc(planDoc)
 
-  const derslerQ = query(
-    collection(db, 'egitim_dersler'),
-    where('plan_id', '==', planId),
-    orderBy('tarih'),
-    orderBy('saat')
-  )
+  const derslerQ = query(collection(db, 'egitim_dersler'), where('plan_id', '==', planId))
   const derslerSnap = await getDocs(derslerQ)
-  const dersler = derslerSnap.docs.map(formatDoc)
+  const dersler = derslerSnap.docs.map(formatDoc).sort((a: any, b: any) => {
+    // Önce tarih, sonra saat sıralaması
+    const tComp = (a.tarih || '').localeCompare(b.tarih || '')
+    if (tComp !== 0) return tComp
+    return (a.saat || '').localeCompare(b.saat || '')
+  })
 
   const personellerSnap = await getDocs(
     query(collection(db, 'egitim_personeller'), orderBy('ad_soyad'))
@@ -410,30 +547,30 @@ export async function getEgitimPlanDetay(planId: string) {
 
 // --- TAKVİM ---
 
-export async function getTakvimEtkinlikleri() {
+export async function getTakvimEtkinlikleri(): Promise<any[]> {
   const snapshot = await getDocs(query(collection(db, 'takvim'), orderBy('tarih', 'asc')))
   return snapshot.docs.map(formatDoc)
 }
 
-export async function addTakvimEtkinlik(data: any) {
+export async function addTakvimEtkinlik(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'takvim'), data)
   return { id: res.id, ...data }
 }
 
-export async function updateTakvimEtkinlik(data: any) {
+export async function updateTakvimEtkinlik(data: any): Promise<boolean> {
   const { id, ...updateData } = data
   await updateDoc(doc(db, 'takvim', id), updateData)
   return true
 }
 
-export async function deleteTakvimEtkinlik(id: string) {
+export async function deleteTakvimEtkinlik(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'takvim', id))
   return true
 }
 
 // --- ARŞİV ---
 
-export async function getNextArsivKlasorNo(yili: string) {
+export async function getNextArsivKlasorNo(yili: string): Promise<number> {
   const q = query(
     collection(db, 'arsiv_dosyalar'),
     where('yili', '==', yili),
@@ -446,32 +583,32 @@ export async function getNextArsivKlasorNo(yili: string) {
   return Number(max) + 1
 }
 
-export async function getArsivKlasorTanimlari() {
+export async function getArsivKlasorTanimlari(): Promise<any[]> {
   const snap = await getDocs(query(collection(db, 'arsiv_klasor_tanimlari'), orderBy('ad', 'asc')))
   return snap.docs.map(formatDoc)
 }
 
-export async function addArsivKlasorTanim(ad: string) {
+export async function addArsivKlasorTanim(ad: string): Promise<any> {
   // Benzersiz kontrolü yapılabilir
   const res = await addDoc(collection(db, 'arsiv_klasor_tanimlari'), { ad: ad.toUpperCase() })
   return { id: res.id, ad: ad.toUpperCase() }
 }
 
-export async function deleteArsivKlasorTanim(id: string) {
+export async function deleteArsivKlasorTanim(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'arsiv_klasor_tanimlari', id))
   return true
 }
 
 // --- ARŞİV İMHA KOMİSYONU ---
 
-export async function getArsivImhaKomisyonu() {
+export async function getArsivImhaKomisyonu(): Promise<any[]> {
   const snap = await getDocs(
     query(collection(db, 'arsiv_imha_komisyonu'), orderBy('ad_soyad', 'asc'))
   )
   return snap.docs.map(formatDoc)
 }
 
-export async function addArsivImhaKomisyonu(data: any) {
+export async function addArsivImhaKomisyonu(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'arsiv_imha_komisyonu'), {
     ad_soyad: data.ad_soyad,
     unvan: data.unvan,
@@ -480,18 +617,18 @@ export async function addArsivImhaKomisyonu(data: any) {
   return { id: res.id, ...data }
 }
 
-export async function updateArsivImhaKomisyonu(data: any) {
+export async function updateArsivImhaKomisyonu(data: any): Promise<boolean> {
   const { id, ...u } = data
   await updateDoc(doc(db, 'arsiv_imha_komisyonu', id), u)
   return true
 }
 
-export async function deleteArsivImhaKomisyonu(id: string) {
+export async function deleteArsivImhaKomisyonu(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'arsiv_imha_komisyonu', id))
   return true
 }
 
-export async function getArsivDosyalar(filtreler: any = {}) {
+export async function getArsivDosyalar(filtreler: any = {}): Promise<any[]> {
   const colRef = collection(db, 'arsiv_dosyalar')
   let q = query(colRef)
 
@@ -523,7 +660,7 @@ export async function getArsivDosyalar(filtreler: any = {}) {
   return results
 }
 
-export async function addArsivDosya(data: any) {
+export async function addArsivDosya(data: any): Promise<any> {
   // Klasör tanımı ekle (varsa ignore, yoksa ekle - Firestore'da unique index yoksa kodla kontrol)
   // Basitlik için direkt ekliyoruz
   const res = await addDoc(collection(db, 'arsiv_dosyalar'), {
@@ -533,7 +670,7 @@ export async function addArsivDosya(data: any) {
   return { id: res.id, ...data }
 }
 
-export async function addArsivToplu(data: any) {
+export async function addArsivToplu(data: any): Promise<boolean> {
   // Klasör adı ekle
   if (data.klasor_adi) {
     // Check if exists logic could be here
@@ -585,7 +722,7 @@ export async function addArsivToplu(data: any) {
   return true
 }
 
-export async function updateArsivToplu(data: { ids: string[]; updates: any }) {
+export async function updateArsivToplu(data: { ids: string[]; updates: any }): Promise<boolean> {
   const { ids, updates } = data
   if (!ids || ids.length === 0) return false
 
@@ -598,7 +735,7 @@ export async function updateArsivToplu(data: { ids: string[]; updates: any }) {
   return true
 }
 
-export async function deleteArsivToplu(ids: string[]) {
+export async function deleteArsivToplu(ids: string[]): Promise<boolean> {
   if (!ids || ids.length === 0) return false
   const batch = writeBatch(db)
   ids.forEach((id) => {
@@ -608,20 +745,20 @@ export async function deleteArsivToplu(ids: string[]) {
   return true
 }
 
-export async function updateArsivDosya(data: any) {
+export async function updateArsivDosya(data: any): Promise<boolean> {
   const { id, ...updateData } = data
   await updateDoc(doc(db, 'arsiv_dosyalar', id), updateData)
   return true
 }
 
-export async function deleteArsivDosya(id: string) {
+export async function deleteArsivDosya(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'arsiv_dosyalar', id))
   return true
 }
 
 // --- SETTINGS ---
 
-export async function getSetting(key: string) {
+export async function getSetting(key: string): Promise<string | null> {
   const docRef = doc(db, 'app_settings', key)
   const snap = await getDoc(docRef)
   if (snap.exists()) {
@@ -630,35 +767,35 @@ export async function getSetting(key: string) {
   return null
 }
 
-export async function setSetting(key: string, value: string) {
+export async function setSetting(key: string, value: string): Promise<boolean> {
   await setDoc(doc(db, 'app_settings', key), { value })
   return true
 }
 
-export async function getAllSettings() {
+export async function getAllSettings(): Promise<any[]> {
   const snap = await getDocs(collection(db, 'app_settings'))
   return snap.docs.map(formatDoc)
 }
 
 // --- E-APOSTİL ---
 
-export async function getEApostil() {
+export async function getEApostil(): Promise<any[]> {
   const snap = await getDocs(query(collection(db, 'e_apostil'), orderBy('ulke_adi', 'asc')))
   return snap.docs.map(formatDoc)
 }
 
-export async function addEApostil(data: any) {
+export async function addEApostil(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'e_apostil'), data)
   return { id: res.id, ...data }
 }
 
-export async function updateEApostil(data: any) {
+export async function updateEApostil(data: any): Promise<boolean> {
   const { id, ...u } = data
   await updateDoc(doc(db, 'e_apostil', id), u)
   return true
 }
 
-export async function deleteEApostil(id: string) {
+export async function deleteEApostil(id: string): Promise<boolean> {
   // Dosyaları da sil
   const filesSnap = await getDocs(
     query(collection(db, 'e_apostil_dosyalar'), where('apostil_id', '==', id))
@@ -670,31 +807,45 @@ export async function deleteEApostil(id: string) {
   return true
 }
 
-export async function getEApostilFiles(apostilId: string) {
+export async function getEApostilFiles(apostilId: string): Promise<any[]> {
   const snap = await getDocs(
     query(collection(db, 'e_apostil_dosyalar'), where('apostil_id', '==', apostilId))
   )
   return snap.docs.map(formatDoc)
 }
 
-export async function addEApostilFile(data: any) {
+export async function addEApostilFile(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'e_apostil_dosyalar'), data)
   return { id: res.id, ...data }
 }
 
-export async function deleteEApostilFile(id: string) {
+export async function deleteEApostilFile(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'e_apostil_dosyalar', id))
   return true
 }
 
 // --- TEBDİL ---
 
-export async function getTebdil() {
-  const snap = await getDocs(query(collection(db, 'tebdil'), orderBy('ulke_adi', 'asc')))
-  return snap.docs.map(formatDoc)
+export async function getTebdil(): Promise<any[]> {
+  const tebdilSnap = await getDocs(query(collection(db, 'tebdil'), orderBy('ulke_adi', 'asc')))
+  const filesSnap = await getDocs(collection(db, 'tebdil_dosyalar'))
+  
+  const fileCounts: Record<string, number> = {}
+  filesSnap.forEach((doc) => {
+    const data = doc.data()
+    const tId = data.tebdil_id
+    if (tId) {
+      fileCounts[tId] = (fileCounts[tId] || 0) + 1
+    }
+  })
+
+  return tebdilSnap.docs.map((doc) => {
+    const item = formatDoc(doc)
+    return { ...item, dosya_sayisi: fileCounts[item.id] || 0 }
+  })
 }
 
-export async function addTebdil(data: any) {
+export async function addTebdil(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'tebdil'), {
     ...data,
     konvansiyon: data.konvansiyon || 'VIYANA_1968'
@@ -702,13 +853,13 @@ export async function addTebdil(data: any) {
   return { id: res.id, ...data }
 }
 
-export async function updateTebdil(data: any) {
+export async function updateTebdil(data: any): Promise<boolean> {
   const { id, ...u } = data
   await updateDoc(doc(db, 'tebdil', id), u)
   return true
 }
 
-export async function deleteTebdil(id: string) {
+export async function deleteTebdil(id: string): Promise<boolean> {
   const filesSnap = await getDocs(
     query(collection(db, 'tebdil_dosyalar'), where('tebdil_id', '==', id))
   )
@@ -719,24 +870,24 @@ export async function deleteTebdil(id: string) {
   return true
 }
 
-export async function getTebdilFiles(tebdilId: string) {
+export async function getTebdilFiles(tebdilId: string): Promise<any[]> {
   const snap = await getDocs(
     query(collection(db, 'tebdil_dosyalar'), where('tebdil_id', '==', tebdilId))
   )
   return snap.docs.map(formatDoc)
 }
 
-export async function addTebdilFile(data: any) {
+export async function addTebdilFile(data: any): Promise<any> {
   const res = await addDoc(collection(db, 'tebdil_dosyalar'), data)
   return { id: res.id, ...data }
 }
 
-export async function deleteTebdilFile(id: string) {
+export async function deleteTebdilFile(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'tebdil_dosyalar', id))
   return true
 }
 
-export async function fetchTebdilData() {
+export async function fetchTebdilData(): Promise<any> {
   // Bu fonksiyon SQLite'ta başlangıç verilerini basıyordu.
   // Firebase'de bunu sadece 1 kez çalıştırmak lazım veya client'ta butonla tetiklemek.
   // Eğer "tebdil" koleksiyonu boşsa otomatik çalışsın:
@@ -898,17 +1049,17 @@ export async function fetchTebdilData() {
 
 // --- KURUM TANIMLARI ---
 
-export async function getKurumTanimlari() {
+export async function getKurumTanimlari(): Promise<any[]> {
   const snap = await getDocs(query(collection(db, 'kurum_tanimlari'), orderBy('ad', 'asc')))
   return snap.docs.map(formatDoc)
 }
 
-export async function addKurumTanim(ad: string) {
+export async function addKurumTanim(ad: string): Promise<any> {
   const res = await addDoc(collection(db, 'kurum_tanimlari'), { ad: ad.toUpperCase() })
   return { id: res.id, ad: ad.toUpperCase() }
 }
 
-export async function deleteKurumTanim(id: string) {
+export async function deleteKurumTanim(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'kurum_tanimlari', id))
   return true
 }

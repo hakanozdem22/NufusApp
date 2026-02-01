@@ -34,6 +34,9 @@ export const EgitimRobotu = () => {
         seciliEgitici={vm.seciliEgitici}
         setSeciliEgitici={vm.setSeciliEgitici}
         personelListesi={vm.personelListesi}
+        duzenleyenler={vm.duzenleyenler}
+        seciliDuzenleyen={vm.seciliDuzenleyen}
+        setSeciliDuzenleyen={vm.setSeciliDuzenleyen}
         saatHedefi={vm.saatHedefi}
         setSaatHedefi={vm.setSaatHedefi}
         sabahOturum={vm.sabahOturum}

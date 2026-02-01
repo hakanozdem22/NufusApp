@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { app, shell, BrowserWindow, ipcMain, dialog, session, protocol, net } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { join } from 'path'
@@ -91,7 +93,16 @@ import {
   // Kurum Tanımları
   getKurumTanimlari,
   addKurumTanim,
-  deleteKurumTanim
+  deleteKurumTanim,
+  // Arşiv İmha Komisyonu
+  getArsivImhaKomisyonu,
+  addArsivImhaKomisyonu,
+  deleteArsivImhaKomisyonu,
+  // Eğitim Düzenleyenler
+  getEgitimDuzenleyenler,
+  addEgitimDuzenleyen,
+  updateEgitimDuzenleyen,
+  deleteEgitimDuzenleyen
 } from './database'
 
 // Güvenli Protokol
@@ -111,7 +122,9 @@ function createWindow(): void {
     height: 800,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    frame: false, // Çerçevesiz mod
+    titleBarStyle: 'hidden', // Gerekirse mac için
+    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -120,6 +133,25 @@ function createWindow(): void {
       allowRunningInsecureContent: false
     }
   })
+
+  // Pencere Kontrol IPC'leri
+  ipcMain.on('window-minimize', () => {
+    mainWindow.minimize()
+  })
+
+  ipcMain.on('window-maximize', () => {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize()
+    } else {
+      mainWindow.maximize()
+    }
+  })
+
+  ipcMain.on('window-close', () => {
+    mainWindow.close()
+  })
+
+  // Start maximized but keep taskbar visible (do not force FullScreen)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.maximize()
@@ -226,7 +258,7 @@ app.whenReady().then(() => {
       if (path.toLowerCase().endsWith('.webp')) mime = 'image/webp'
       if (path.toLowerCase().endsWith('.svg')) mime = 'image/svg+xml'
       return `data:${mime};base64,${base64}`
-    } catch (e) {
+    } catch (_e) {
       return null
     }
   })
@@ -295,22 +327,41 @@ app.whenReady().then(() => {
   ipcMain.handle('get-arsiv-tanimlar', async () => getArsivKlasorTanimlari())
   ipcMain.handle('add-arsiv-tanim', async (_, ad) => addArsivKlasorTanim(ad))
   ipcMain.handle('delete-arsiv-tanim', async (_, id) => deleteArsivKlasorTanim(id))
+  // Arşiv İmha Komisyonu
+  ipcMain.handle('get-arsiv-imha-komisyonu', async () => getArsivImhaKomisyonu())
+  ipcMain.handle('add-arsiv-imha-komisyonu', async (_, d) => addArsivImhaKomisyonu(d))
+  ipcMain.handle('delete-arsiv-imha-komisyonu', async (_, id) => deleteArsivImhaKomisyonu(id))
 
   // Diğer Modüller (Aynen Kalmalı)
-  const handlePdf = async (scriptName, data) => {
+  const handlePdf = async (scriptName, data): Promise<any> => {
     return new Promise((resolve, reject) => {
       const scriptPath = is.dev
         ? join(__dirname, `../../resources/${scriptName}`)
         : join(process.resourcesPath, scriptName)
       const pythonProcess = spawn('python', [scriptPath])
       let dataString = ''
+      let errorString = ''
+
       pythonProcess.stdin.write(JSON.stringify(data))
       pythonProcess.stdin.end()
+
       pythonProcess.stdout.on('data', (d) => (dataString += d.toString()))
-      pythonProcess.on('close', () => {
+      pythonProcess.stderr.on('data', (d) => {
+        errorString += d.toString()
+        console.error('Python Stderr:', d.toString())
+      })
+
+      pythonProcess.on('close', (code) => {
+        if (code !== 0) {
+          console.error(`Python process exited with code ${code}`)
+          console.error('Error details:', errorString)
+          reject(errorString || 'Python script hata kodu ile kapandı')
+          return
+        }
+
         try {
           resolve(dataString)
-        } catch (e) {
+        } catch (_e) {
           reject('Hata')
         }
       })
@@ -319,6 +370,41 @@ app.whenReady().then(() => {
   ipcMain.handle('create-pdf-python', async (_, data) =>
     handlePdf('zimmet_pdf.py', { liste: data })
   )
+  ipcMain.handle('save-zimmet-pdf', async (_, buffer) => {
+    try {
+      const desktop = app.getPath('desktop')
+      // Format: Zimmet_dd-mm-yyyy_HH-MM-SS.pdf
+      const now = new Date()
+      const format = (n: number) => (n < 10 ? '0' + n : n)
+      const dateStr = `${format(now.getDate())}-${format(now.getMonth() + 1)}-${now.getFullYear()}_${format(now.getHours())}-${format(now.getMinutes())}-${format(now.getSeconds())}`
+      const fileName = `Zimmet_${dateStr}.pdf`
+      const filePath = join(desktop, fileName)
+      fs.writeFileSync(filePath, Buffer.from(buffer))
+      await shell.openPath(filePath)
+      return { success: true, path: filePath }
+    } catch (e: any) {
+      console.error(e)
+      return { success: false, error: e.message }
+    }
+  })
+
+  // GENERIC PDF SAVER
+  ipcMain.handle('save-pdf', async (_, { buffer, prefix }) => {
+    try {
+      const desktop = app.getPath('desktop')
+      const now = new Date()
+      const format = (n: number) => (n < 10 ? '0' + n : n)
+      const dateStr = `${format(now.getDate())}-${format(now.getMonth() + 1)}-${now.getFullYear()}_${format(now.getHours())}-${format(now.getMinutes())}-${format(now.getSeconds())}`
+      const fileName = `${prefix || 'Rapor'}_${dateStr}.pdf`
+      const filePath = join(desktop, fileName)
+      fs.writeFileSync(filePath, Buffer.from(buffer))
+      await shell.openPath(filePath)
+      return { success: true, path: filePath }
+    } catch (e: any) {
+      console.error(e)
+      return { success: false, error: e.message }
+    }
+  })
   ipcMain.handle('create-pdf-terfi', async (_, data) => handlePdf('terfi_pdf.py', data))
   ipcMain.handle('create-pdf-resmi-yazi', async (_, data) =>
     handlePdf('resmi_yazi_pdf.py', { liste: data })
@@ -341,7 +427,7 @@ app.whenReady().then(() => {
       pythonProcess.on('close', () => {
         try {
           resolve(dataString)
-        } catch (e) {
+        } catch (_e) {
           reject('Python Hata')
         }
       })
@@ -352,7 +438,7 @@ app.whenReady().then(() => {
       const ses = session.fromPartition('persist:google')
       await ses.clearStorageData()
       return true
-    } catch (e) {
+    } catch (_e) {
       return false
     }
   })
@@ -410,6 +496,10 @@ app.whenReady().then(() => {
   ipcMain.handle('add-egitim-personel', async (_, v) => addEgitimPersonel(v))
   ipcMain.handle('delete-egitim-personel', async (_, id) => deleteEgitimPersonel(id))
   ipcMain.handle('update-egitim-personel', async (_, v) => updateEgitimPersonel(v))
+  ipcMain.handle('get-egitim-duzenleyenler', async () => getEgitimDuzenleyenler())
+  ipcMain.handle('add-egitim-duzenleyen', async (_, v) => addEgitimDuzenleyen(v))
+  ipcMain.handle('update-egitim-duzenleyen', async (_, v) => updateEgitimDuzenleyen(v))
+  ipcMain.handle('delete-egitim-duzenleyen', async (_, id) => deleteEgitimDuzenleyen(id))
   ipcMain.handle('get-egitim-planlar', async () => getEgitimPlanlar())
   ipcMain.handle('save-egitim-plan', async (_, v) => saveEgitimPlan(v))
   ipcMain.handle('delete-egitim-plan', async (_, id) => deleteEgitimPlan(id))

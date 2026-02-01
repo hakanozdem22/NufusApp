@@ -217,15 +217,22 @@ export const HarcamaListesi = () => {
     }
 
     try {
-      await window.api.createPdfHarcama({
+      const resultStr = await window.api.createPdfHarcama({
         liste: yazdirilacakListe,
         ozet: ozet,
         donem: baslikTarih,
         rapor_turu: raporTuru
       })
-      mesajGoster('Rapor oluşturuldu.')
-    } catch (e) {
-      mesajGoster('PDF hatası.', 'hata')
+
+      const res = JSON.parse(resultStr)
+      if (res.success) {
+        mesajGoster('Rapor oluşturuldu.')
+      } else {
+        throw new Error(res.error || 'PDF oluşturulamadı.')
+      }
+    } catch (e: any) {
+      console.error(e)
+      mesajGoster('PDF hatası: ' + e.message, 'hata')
     } finally {
       setYukleniyor(false)
     }

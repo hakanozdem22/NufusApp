@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const Database = require('better-sqlite3')
 const path = require('path')
 const os = require('os')

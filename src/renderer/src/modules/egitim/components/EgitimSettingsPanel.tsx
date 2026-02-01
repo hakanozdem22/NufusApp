@@ -6,6 +6,9 @@ interface EgitimSettingsPanelProps {
   setTarih: (val: string) => void
   seciliEgitici: string
   setSeciliEgitici: (val: string) => void
+  duzenleyenler: PersonelBasic[]
+  seciliDuzenleyen: string
+  setSeciliDuzenleyen: (val: string) => void
   personelListesi: PersonelBasic[]
   saatHedefi: string
   setSaatHedefi: (val: string) => void
@@ -34,6 +37,9 @@ export const EgitimSettingsPanel = ({
   setTarih,
   seciliEgitici,
   setSeciliEgitici,
+  duzenleyenler,
+  seciliDuzenleyen,
+  setSeciliDuzenleyen,
   personelListesi,
   saatHedefi,
   setSaatHedefi,
@@ -89,6 +95,21 @@ export const EgitimSettingsPanel = ({
           >
             <option value="">Seçiniz...</option>
             {personelListesi.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.ad_soyad} {p.unvan ? `(${p.unvan})` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Düzenleyen</label>
+          <select
+            className="w-full border dark:border-gray-600 p-2 rounded text-sm bg-white dark:bg-gray-700 dark:text-white"
+            value={seciliDuzenleyen}
+            onChange={(e) => setSeciliDuzenleyen(e.target.value)}
+          >
+            <option value="">Seçiniz...</option>
+            {duzenleyenler?.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.ad_soyad} {p.unvan ? `(${p.unvan})` : ''}
               </option>

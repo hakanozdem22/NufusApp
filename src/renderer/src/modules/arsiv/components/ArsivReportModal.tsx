@@ -1,4 +1,5 @@
 import { Printer, Loader2 } from 'lucide-react'
+import { ModernCombobox } from '../../../shared/components/ModernCombobox'
 
 interface ArsivReportModalProps {
   isOpen: boolean
@@ -9,6 +10,7 @@ interface ArsivReportModalProps {
   komisyon: { baskan: string; uye1: string; uye2: string }
   setKomisyon: (val: { baskan: string; uye1: string; uye2: string }) => void
   yukleniyor: boolean
+  imhaKomisyonu?: { id: number; ad_soyad: string; unvan: string; gorev: 'BASKAN' | 'UYE' }[]
 }
 
 export const ArsivReportModal = ({
@@ -19,7 +21,8 @@ export const ArsivReportModal = ({
   setRaporTipi,
   komisyon,
   setKomisyon,
-  yukleniyor
+  yukleniyor,
+  imhaKomisyonu
 }: ArsivReportModalProps) => {
   if (!isOpen) return null
 
@@ -88,26 +91,105 @@ export const ArsivReportModal = ({
           </div>
           <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700/50 text-xs mb-6 transition-colors">
             <strong className="block mb-2 text-yellow-800 dark:text-yellow-400">Komisyon</strong>
-            <div className="grid gap-2">
-              <input
-                placeholder="Başkan"
-                className="border border-yellow-300 dark:border-yellow-600 p-2 rounded bg-white dark:bg-gray-800 w-full text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:ring-1 focus:ring-yellow-500 transition-colors"
-                value={komisyon.baskan}
-                onChange={(e) => setKomisyon({ ...komisyon, baskan: e.target.value })}
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  placeholder="Üye 1"
-                  className="border border-yellow-300 dark:border-yellow-600 p-2 rounded bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:ring-1 focus:ring-yellow-500 transition-colors"
-                  value={komisyon.uye1}
-                  onChange={(e) => setKomisyon({ ...komisyon, uye1: e.target.value })}
-                />
-                <input
-                  placeholder="Üye 2"
-                  className="border border-yellow-300 dark:border-yellow-600 p-2 rounded bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:ring-1 focus:ring-yellow-500 transition-colors"
-                  value={komisyon.uye2}
-                  onChange={(e) => setKomisyon({ ...komisyon, uye2: e.target.value })}
-                />
+            <div className="grid gap-4">
+              {/* Başkan */}
+              <div>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">
+                  Komisyon Başkanı
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <ModernCombobox
+                    className="w-full"
+                    options={
+                      imhaKomisyonu
+                        ?.filter((u) => u.gorev === 'BASKAN')
+                        .map((p) => ({
+                          value: p.id,
+                          label: p.ad_soyad
+                        })) || []
+                    }
+                    placeholder="Başkan Seç"
+                    searchPlaceholder="Başkan Ara..."
+                    onChange={(val) => {
+                      const p = imhaKomisyonu?.find((per) => per.id === Number(val))
+                      if (p)
+                        setKomisyon({ ...komisyon, baskan: `${p.ad_soyad} - ${p.unvan || ''}` })
+                    }}
+                  />
+                  <input
+                    placeholder="Ad Soyad - Unvan"
+                    className="border border-yellow-300 dark:border-yellow-600 p-2 rounded bg-white dark:bg-gray-800 w-full text-xs text-gray-800 dark:text-gray-200 outline-none focus:ring-1 focus:ring-yellow-500"
+                    value={komisyon.baskan}
+                    onChange={(e) => setKomisyon({ ...komisyon, baskan: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Üyeler */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">
+                    Üye 1
+                  </label>
+                  <div className="flex flex-col gap-1">
+                    <ModernCombobox
+                      className="w-full"
+                      options={
+                        imhaKomisyonu
+                          ?.filter((u) => u.gorev === 'UYE') // Sadece Üyeleri filtrele
+                          .map((p) => ({
+                            value: p.id,
+                            label: p.ad_soyad
+                          })) || []
+                      }
+                      placeholder="Üye Seç"
+                      searchPlaceholder="Üye Ara..."
+                      onChange={(val) => {
+                        const p = imhaKomisyonu?.find((per) => per.id === Number(val))
+                        if (p)
+                          setKomisyon({ ...komisyon, uye1: `${p.ad_soyad} - ${p.unvan || ''}` })
+                      }}
+                    />
+                    <input
+                      placeholder="Üye 1"
+                      className="border border-yellow-300 dark:border-yellow-600 p-2 rounded bg-white dark:bg-gray-800 text-xs text-gray-800 dark:text-gray-200 outline-none focus:ring-1 focus:ring-yellow-500"
+                      value={komisyon.uye1}
+                      onChange={(e) => setKomisyon({ ...komisyon, uye1: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 block">
+                    Üye 2
+                  </label>
+                  <div className="flex flex-col gap-1">
+                    <ModernCombobox
+                      className="w-full"
+                      options={
+                        imhaKomisyonu
+                          ?.filter((u) => u.gorev === 'UYE')
+                          .map((p) => ({
+                            value: p.id,
+                            label: p.ad_soyad
+                          })) || []
+                      }
+                      placeholder="Üye Seç"
+                      searchPlaceholder="Üye Ara..."
+                      onChange={(val) => {
+                        const p = imhaKomisyonu?.find((per) => per.id === Number(val))
+                        if (p)
+                          setKomisyon({ ...komisyon, uye2: `${p.ad_soyad} - ${p.unvan || ''}` })
+                      }}
+                    />
+                    <input
+                      placeholder="Üye 2"
+                      className="border border-yellow-300 dark:border-yellow-600 p-2 rounded bg-white dark:bg-gray-800 text-xs text-gray-800 dark:text-gray-200 outline-none focus:ring-1 focus:ring-yellow-500"
+                      value={komisyon.uye2}
+                      onChange={(e) => setKomisyon({ ...komisyon, uye2: e.target.value })}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
