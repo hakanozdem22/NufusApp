@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useSettingsViewModel } from '../viewmodels/useSettingsViewModel'
 
-export const EgitimSettings = (): JSX.Element => {
+export const EgitimSettings = () => {
   const {
     egitimKonular,
     konuEkle,
