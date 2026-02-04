@@ -248,7 +248,8 @@ def create_pdf(data_json):
         font_name = register_fonts()
         debug_log(f"Font: {font_name}")
         
-        desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+        # Use desktop_path from Electron, fallback to USERPROFILE/Desktop
+        desktop = data.get('desktop_path') or os.path.join(os.environ['USERPROFILE'], 'Desktop')
         tarih_str = datetime.datetime.now().strftime('%d%m%Y_%H%M')
         
         filename_prefix = "Arsiv_Listesi"

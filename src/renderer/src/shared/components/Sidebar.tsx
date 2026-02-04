@@ -214,7 +214,7 @@ export const Sidebar = ({ isCollapsed, toggleSidebar }: SidebarProps): React.Rea
             <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 truncate">
               Mevzuat
             </h4>
-            <p className="text-xs text-gray-400 truncate">v2.1.0</p>
+            <p className="text-xs text-gray-400 truncate">v3.5.0</p>
           </div>
         </div>
       </div>

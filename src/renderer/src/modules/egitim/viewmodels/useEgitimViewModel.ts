@@ -159,17 +159,7 @@ export const useEgitimViewModel = () => {
     const adayKonular = konular.filter((k) => !zorunluDersler.includes(k.baslik))
 
     // 2. KAÇ DERS LAZIM?
-    // Günlük saati de dinamik hesapla
-    const sabahSure = calculateDuration(sabahOturum)
-    const ogleSure = calculateDuration(ogleOturum)
-    const gunlukSaat = sabahSure + ogleSure
-    
-    const hedefSaatInt = parseInt(saatHedefi) || 100
-    const toplamDersSayisi = Math.ceil(hedefSaatInt / gunlukSaat) * 2 // Kabaca her oturum 1 ders sayılırsa
-    
-    // Eksik kalan kısım kadar rastgele seç (Basit yaklaşım: Hedef / (Sabah+Öğle Ortalaması))
-    // Konu sayısı hesabı biraz karmaşıklaşıyor ama yaklaşık bir değer yeterli
-    const approximateLessonCount = Math.ceil(targetHours / 3) 
+    const approximateLessonCount = Math.ceil(targetHours / 3)
     const gerekenEkDers = Math.max(0, approximateLessonCount - zorunluKonuObjeleri.length)
 
     // 3. KARIŞIK SEÇ (Shuffle)

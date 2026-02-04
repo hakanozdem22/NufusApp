@@ -12,8 +12,10 @@ SHEET_ID_EK2 = "1bN_k4rfYyzRk5zE31lv0a19Ph8oE8A4CSl_nMiPwCcg"
 SHEET_ID_EK3 = "1caObSLbmdYbxnk_lRyOp8Q2b8om_A66w4S37qtPr9Wc"
 # -----------------------------------
 
-def get_desktop_path():
-    return os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+def get_desktop_path(custom_path=None):
+    if custom_path:
+        return custom_path
+    return os.path.join(os.environ['USERPROFILE'], 'Desktop')
 
 def get_sort_key(text):
     try:
@@ -40,6 +42,7 @@ def run_process(data_json):
         islem_tipi = payload.get('tip') # 'EK2' veya 'EK3'
         veri = payload.get('veri', {})
         resource_path = payload.get('resource_path', '.') # anahtar.json yolu için
+        desktop_path = payload.get('desktop_path')  # Electron'dan gelen masaüstü yolu
         
         # 1. Google Bağlantısı
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
@@ -201,7 +204,7 @@ def run_process(data_json):
         
         if response.status_code == 200:
             dosya_adi = f"{file_prefix}_{datetime.datetime.now().strftime('%H%M%S')}.pdf"
-            save_path = os.path.join(get_desktop_path(), dosya_adi)
+            save_path = os.path.join(get_desktop_path(desktop_path), dosya_adi)
             with open(save_path, 'wb') as f:
                 f.write(response.content)
             

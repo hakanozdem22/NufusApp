@@ -19,7 +19,8 @@ def create_pdf(data_json):
         liste = data.get('liste', [])
         rapor_tipi = data.get('tip', 'DURUM') # 'DURUM' veya 'TERFI'
         
-        desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+        # Use desktop_path from Electron, fallback to USERPROFILE/Desktop
+        desktop = data.get('desktop_path') or os.path.join(os.environ['USERPROFILE'], 'Desktop')
         tarih_str = datetime.datetime.now().strftime('%d%m%Y_%H%M')
         
         # Font

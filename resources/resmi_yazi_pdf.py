@@ -18,7 +18,8 @@ def create_pdf(data_json):
         data = json.loads(data_json)
         liste = data.get('liste', [])
         
-        desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+        # Use desktop_path from Electron, fallback to USERPROFILE/Desktop
+        desktop = data.get('desktop_path') or os.path.join(os.environ['USERPROFILE'], 'Desktop')
         tarih_str = datetime.datetime.now().strftime('%d-%m-%Y_%H-%M-%S')
         dosya_adi = f"Resmi_Yazi_Listesi_{tarih_str}.pdf"
         dosya_yolu = os.path.join(desktop, dosya_adi)

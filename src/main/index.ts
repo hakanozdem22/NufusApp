@@ -342,7 +342,11 @@ app.whenReady().then(() => {
       let dataString = ''
       let errorString = ''
 
-      pythonProcess.stdin.write(JSON.stringify(data))
+      // Add desktop path to data for Python scripts
+      const desktopPath = app.getPath('desktop')
+      const dataWithDesktop = { ...data, desktop_path: desktopPath }
+
+      pythonProcess.stdin.write(JSON.stringify(dataWithDesktop))
       pythonProcess.stdin.end()
 
       pythonProcess.stdout.on('data', (d) => (dataString += d.toString()))

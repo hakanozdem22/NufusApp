@@ -20,7 +20,8 @@ def create_pdf(data_json):
         personeller = input_data.get('personeller', [])
         program_adi = input_data.get('program_adi', 'Eğitim Programı')
         
-        desktop = os.path.join(os.path.expanduser("~"), 'Desktop')
+        # Use desktop_path from Electron, fallback to expanduser
+        desktop = input_data.get('desktop_path') or os.path.join(os.path.expanduser("~"), 'Desktop')
         tarih_str = datetime.datetime.now().strftime('%d-%m-%Y_%H-%M-%S')
         dosya_adi = f"Egitim_Plani_{tarih_str}.pdf"
         dosya_yolu = os.path.join(desktop, dosya_adi)
