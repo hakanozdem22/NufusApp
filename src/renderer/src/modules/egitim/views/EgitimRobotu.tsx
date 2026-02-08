@@ -37,6 +37,8 @@ export const EgitimRobotu = () => {
         duzenleyenler={vm.duzenleyenler}
         seciliDuzenleyen={vm.seciliDuzenleyen}
         setSeciliDuzenleyen={vm.setSeciliDuzenleyen}
+        seciliOnaylayan={vm.seciliOnaylayan}
+        setSeciliOnaylayan={vm.setSeciliOnaylayan}
         saatHedefi={vm.saatHedefi}
         setSaatHedefi={vm.setSaatHedefi}
         sabahOturum={vm.sabahOturum}

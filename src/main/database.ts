@@ -798,7 +798,7 @@ export async function updateEApostil(data: any): Promise<boolean> {
 export async function deleteEApostil(id: string): Promise<boolean> {
   // Dosyaları da sil
   const filesSnap = await getDocs(
-    query(collection(db, 'e_apostil_dosyalar'), where('apostil_id', '==', id))
+    query(collection(db, 'e_apostil_files'), where('e_apostil_id', '==', id))
   )
   const batch = writeBatch(db)
   filesSnap.forEach((d) => batch.delete(d.ref))
@@ -807,49 +807,32 @@ export async function deleteEApostil(id: string): Promise<boolean> {
   return true
 }
 
-export async function getEApostilFiles(apostilId: string): Promise<any[]> {
+export async function getEApostilFiles(eApostilId: string): Promise<any[]> {
   const snap = await getDocs(
-    query(collection(db, 'e_apostil_dosyalar'), where('apostil_id', '==', apostilId))
+    query(collection(db, 'e_apostil_files'), where('e_apostil_id', '==', eApostilId))
   )
   return snap.docs.map(formatDoc)
 }
 
 export async function addEApostilFile(data: any): Promise<any> {
-  const res = await addDoc(collection(db, 'e_apostil_dosyalar'), data)
+  const res = await addDoc(collection(db, 'e_apostil_files'), data)
   return { id: res.id, ...data }
 }
 
 export async function deleteEApostilFile(id: string): Promise<boolean> {
-  await deleteDoc(doc(db, 'e_apostil_dosyalar', id))
+  await deleteDoc(doc(db, 'e_apostil_files', id))
   return true
 }
 
-// --- TEBDİL ---
+// --- TEBDİL (EHLİYET) ---
 
 export async function getTebdil(): Promise<any[]> {
-  const tebdilSnap = await getDocs(query(collection(db, 'tebdil'), orderBy('ulke_adi', 'asc')))
-  const filesSnap = await getDocs(collection(db, 'tebdil_dosyalar'))
-  
-  const fileCounts: Record<string, number> = {}
-  filesSnap.forEach((doc) => {
-    const data = doc.data()
-    const tId = data.tebdil_id
-    if (tId) {
-      fileCounts[tId] = (fileCounts[tId] || 0) + 1
-    }
-  })
-
-  return tebdilSnap.docs.map((doc) => {
-    const item = formatDoc(doc)
-    return { ...item, dosya_sayisi: fileCounts[item.id] || 0 }
-  })
+  const snap = await getDocs(query(collection(db, 'tebdil'), orderBy('ulke_adi', 'asc')))
+  return snap.docs.map(formatDoc)
 }
 
 export async function addTebdil(data: any): Promise<any> {
-  const res = await addDoc(collection(db, 'tebdil'), {
-    ...data,
-    konvansiyon: data.konvansiyon || 'VIYANA_1968'
-  })
+  const res = await addDoc(collection(db, 'tebdil'), data)
   return { id: res.id, ...data }
 }
 
@@ -861,7 +844,7 @@ export async function updateTebdil(data: any): Promise<boolean> {
 
 export async function deleteTebdil(id: string): Promise<boolean> {
   const filesSnap = await getDocs(
-    query(collection(db, 'tebdil_dosyalar'), where('tebdil_id', '==', id))
+    query(collection(db, 'tebdil_files'), where('tebdil_id', '==', id))
   )
   const batch = writeBatch(db)
   filesSnap.forEach((d) => batch.delete(d.ref))
@@ -872,31 +855,22 @@ export async function deleteTebdil(id: string): Promise<boolean> {
 
 export async function getTebdilFiles(tebdilId: string): Promise<any[]> {
   const snap = await getDocs(
-    query(collection(db, 'tebdil_dosyalar'), where('tebdil_id', '==', tebdilId))
+    query(collection(db, 'tebdil_files'), where('tebdil_id', '==', tebdilId))
   )
   return snap.docs.map(formatDoc)
 }
 
 export async function addTebdilFile(data: any): Promise<any> {
-  const res = await addDoc(collection(db, 'tebdil_dosyalar'), data)
+  const res = await addDoc(collection(db, 'tebdil_files'), data)
   return { id: res.id, ...data }
 }
 
 export async function deleteTebdilFile(id: string): Promise<boolean> {
-  await deleteDoc(doc(db, 'tebdil_dosyalar', id))
+  await deleteDoc(doc(db, 'tebdil_files', id))
   return true
 }
 
 export async function fetchTebdilData(): Promise<any> {
-  // Bu fonksiyon SQLite'ta başlangıç verilerini basıyordu.
-  // Firebase'de bunu sadece 1 kez çalıştırmak lazım veya client'ta butonla tetiklemek.
-  // Eğer "tebdil" koleksiyonu boşsa otomatik çalışsın:
-  const snap = await getDocs(collection(db, 'tebdil'))
-  if (snap.size > 0) return { success: true, message: 'Veriler zaten var.' }
-
-  const batch = writeBatch(db)
-
-  // Karayolu Trafik Konvansiyonu Üye Ülkeleri (Vienna 1968)
   const viennaCountries = [
     'Almanya',
     'Arnavutluk',
@@ -977,7 +951,6 @@ export async function fetchTebdilData(): Promise<any> {
     'Zimbabve'
   ]
 
-  // Cenevre Konvansiyonu Tarafları (1949)
   const genevaCountries = [
     'ABD',
     'Avustralya',
@@ -1025,6 +998,13 @@ export async function fetchTebdilData(): Promise<any> {
     'Yeni Zelanda'
   ]
 
+  // Bu fonksiyon SQLite'ta başlangıç verilerini basıyordu.
+  // Firebase'de bunu sadece 1 kez çalıştırmak lazım veya client'ta butonla tetiklemek.
+  const snap = await getDocs(collection(db, 'tebdil'))
+  if (snap.size > 0) return { success: true, message: 'Veriler zaten var.' }
+
+  const batch = writeBatch(db)
+
   viennaCountries.forEach((ulke) => {
     const ref = doc(collection(db, 'tebdil'))
     batch.set(ref, {
@@ -1063,3 +1043,122 @@ export async function deleteKurumTanim(id: string): Promise<boolean> {
   await deleteDoc(doc(db, 'kurum_tanimlari', id))
   return true
 }
+
+// ==========================================
+// TAŞINIR MALZEME ENVANTER SİSTEMİ
+// ==========================================
+
+// --- MALZEMELER ---
+
+export async function getEnvanterMalzemeler(criteria: any = {}): Promise<any[]> {
+  // Not: Firestore'da dinamik çoklu filtreleme zordur. Client-side filtreleme yapalım.
+  const snapshot = await getDocs(collection(db, 'envanter_malzemeler'))
+  let results = snapshot.docs.map(formatDoc)
+
+  if (criteria.ad && criteria.ad !== 'Tümü') results = results.filter((r) => r.ad === criteria.ad)
+  if (criteria.marka && criteria.marka !== 'Tümü')
+    results = results.filter((r) => r.marka === criteria.marka)
+  if (criteria.konum && criteria.konum !== 'Tümü')
+    results = results.filter((r) => r.konum === criteria.konum)
+  if (criteria.personel && criteria.personel !== 'Tümü')
+    results = results.filter((r) => r.personel === criteria.personel)
+  if (criteria.durum && criteria.durum !== 'Tümü')
+    results = results.filter((r) => r.durum === criteria.durum)
+  if (criteria.ara) {
+    const term = criteria.ara.toLowerCase()
+    results = results.filter((r) => r.ad?.toLowerCase().includes(term))
+  }
+
+  // Sort by date or id descending
+  // Assuming 'tarih' is YYYY-MM-DD HH:mm
+  results.sort((a, b) => (b.tarih || '').localeCompare(a.tarih || ''))
+
+  return results
+}
+
+export async function addEnvanterMalzeme(data: any): Promise<any> {
+  const res = await addDoc(collection(db, 'envanter_malzemeler'), data)
+  return { id: res.id, ...data }
+}
+
+export async function updateEnvanterMalzeme(data: any): Promise<boolean> {
+  const { id, ...u } = data
+  await updateDoc(doc(db, 'envanter_malzemeler', id), u)
+  return true
+}
+
+export async function deleteEnvanterMalzeme(id: string): Promise<boolean> {
+  await deleteDoc(doc(db, 'envanter_malzemeler', id))
+  return true
+}
+
+export async function getEnvanterSummary(field: string): Promise<any[]> {
+  // Group by field and sum 'adet'
+  const snapshot = await getDocs(collection(db, 'envanter_malzemeler'))
+  const data = snapshot.docs.map((d) => d.data())
+  const summary: Record<string, number> = {}
+
+  data.forEach((item: any) => {
+    const key = item[field] || 'Belirsiz'
+    const count = Number(item.adet) || 0
+    if (!summary[key]) summary[key] = 0
+    summary[key] += count
+  })
+
+  // Return as array [key, value]
+  return Object.entries(summary).map(([key, val]) => [key, val]).sort((a: any, b: any) => a[0].localeCompare(b[0]))
+}
+
+// --- TANIMLAMALAR (Ayarlar) ---
+
+// Generic Helper for Definitions
+async function getDefinitions(collName: string, orderByField = 'ad'): Promise<any[]> {
+  const snap = await getDocs(query(collection(db, collName), orderBy(orderByField, 'asc')))
+  return snap.docs.map(formatDoc)
+}
+
+async function addDefinition(collName: string, data: any): Promise<any> {
+  const res = await addDoc(collection(db, collName), data)
+  return { id: res.id, ...data }
+}
+
+async function updateDefinition(collName: string, data: any): Promise<boolean> {
+    const { id, ...u } = data
+    await updateDoc(doc(db, collName, id), u)
+    return true
+}
+
+async function deleteDefinition(collName: string, id: string): Promise<boolean> {
+  await deleteDoc(doc(db, collName, id))
+  return true
+}
+
+// Kategoriler
+export const getEnvanterKategoriler = () => getDefinitions('envanter_tanim_kategori')
+export const addEnvanterKategori = (ad: string) => addDefinition('envanter_tanim_kategori', { ad })
+export const deleteEnvanterKategori = (id: string) => deleteDefinition('envanter_tanim_kategori', id)
+export const updateEnvanterKategori = (id: string, ad: string) => updateDefinition('envanter_tanim_kategori', { id, ad })
+
+// Yerler
+export const getEnvanterYerler = () => getDefinitions('envanter_tanim_yer', 'yer_adi')
+export const addEnvanterYer = (yer_adi: string) => addDefinition('envanter_tanim_yer', { yer_adi })
+export const deleteEnvanterYer = (id: string) => deleteDefinition('envanter_tanim_yer', id)
+export const updateEnvanterYer = (id: string, yer_adi: string) => updateDefinition('envanter_tanim_yer', { id, yer_adi })
+
+// Malzeme Tanımları (Catalog)
+export const getEnvanterMalzemeTanimlari = () => getDefinitions('envanter_tanim_malzeme')
+export const addEnvanterMalzemeTanim = (data: { ad: string; kategori: string }) => addDefinition('envanter_tanim_malzeme', data)
+export const deleteEnvanterMalzemeTanim = (id: string) => deleteDefinition('envanter_tanim_malzeme', id)
+export const updateEnvanterMalzemeTanim = (data: any) => updateDefinition('envanter_tanim_malzeme', data)
+
+// Marka Tanımları
+export const getEnvanterMarkaTanimlari = () => getDefinitions('envanter_tanim_marka')
+export const addEnvanterMarkaTanim = (data: { ad: string; kategori: string; malzeme_adi: string }) => addDefinition('envanter_tanim_marka', data)
+export const deleteEnvanterMarkaTanim = (id: string) => deleteDefinition('envanter_tanim_marka', id)
+export const updateEnvanterMarkaTanim = (data: any) => updateDefinition('envanter_tanim_marka', data)
+
+// Personel Tanımları
+export const getEnvanterPersonelTanimlari = () => getDefinitions('envanter_tanim_personel')
+export const addEnvanterPersonelTanim = (ad: string) => addDefinition('envanter_tanim_personel', { ad })
+export const deleteEnvanterPersonelTanim = (id: string) => deleteDefinition('envanter_tanim_personel', id)
+export const updateEnvanterPersonelTanim = (id: string, ad: string) => updateDefinition('envanter_tanim_personel', { id, ad })

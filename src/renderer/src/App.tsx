@@ -18,6 +18,9 @@ import { Tebdil } from './modules/tebdil/views/Tebdil'
 import { SurucuBelgesiDashboard } from './modules/surucu_belgesi/views/SurucuBelgesiDashboard'
 import { PersonelIsleriDashboard } from './modules/personel_isleri/views/PersonelIsleriDashboard'
 import { Settings } from './modules/settings/views/Settings'
+// Envanter
+import { EnvanterDashboard } from './modules/envanter/views/EnvanterDashboard'
+import { EnvanterSettings } from './modules/envanter/views/EnvanterSettings'
 
 import { ThemeProvider } from './shared/context/ThemeContext'
 import { useState } from 'react'
@@ -53,6 +56,9 @@ function App() {
             <Route path="/tebdil" element={<Tebdil />} />
             <Route path="/personel-isleri" element={<PersonelIsleriDashboard />} />
             <Route path="/surucu-belgesi" element={<SurucuBelgesiDashboard />} />
+
+            <Route path="/envanter" element={<EnvanterDashboard />} />
+            <Route path="/envanter-tanimlar" element={<EnvanterSettings />} />
 
             <Route path="/ayarlar" element={<Settings />} />
             <Route path="*" element={<Dashboard />} />

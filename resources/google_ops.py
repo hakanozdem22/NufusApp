@@ -156,6 +156,12 @@ def run_process(data_json):
             if duzenleyen:
                 duzenleyen_str = f"{duzenleyen.get('ad_soyad', '')} \n {duzenleyen.get('unvan', '')}"
             
+            # Onaylayan Bilgisi (YENİ)
+            onaylayan = veri.get('onaylayan', {})
+            onaylayan_str = ""
+            if onaylayan:
+                onaylayan_str = f"{onaylayan.get('ad_soyad', '')} \n {onaylayan.get('unvan', '')}"
+
             # Eğitici bilgisini derslerden al (İlk dersin eğiticisi varsayılır)
             egitici_str = ""
             if dersler:
@@ -178,9 +184,10 @@ def run_process(data_json):
                 {'range': 'D11', 'values': [[len(codes)]]},
                 {'range': 'E11', 'values': [[total_hours]]},
                 {'range': 'F11', 'values': [[kadin]]},          # Kadın Sayısı
-                {'range': 'G11', 'values': [[toplam_pers]]},    # Toplam (K+E)
+                {'range': 'G11', 'values': [[erkek]]},          # Erkek Sayısı
                 {'range': 'I11', 'values': [[toplam_pers]]},    # Başarılı Sayısı (Varsayılan hepsi)
                 {'range': 'A20', 'values': [[duzenleyen_str]]}, # Düzenleyen
+                {'range': 'H20', 'values': [[onaylayan_str]]},  # Onaylayan (YENİ)
                 {'range': 'D20', 'values': [[datetime.datetime.now().strftime("%d.%m.%Y")]]}, # Tarih
                 {'range': 'E20', 'values': [[egitici_str]]}     # Eğitici
             ]

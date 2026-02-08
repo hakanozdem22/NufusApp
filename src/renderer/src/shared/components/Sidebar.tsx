@@ -17,7 +17,8 @@ import {
   Car,
   Users,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Package
 } from 'lucide-react'
 import logoImg from '../../assets/nufus-logo.png'
 
@@ -71,6 +72,7 @@ export const Sidebar = ({ isCollapsed, toggleSidebar }: SidebarProps): React.Rea
       { title: 'Resmi Yazı', src: <FileText size={20} />, path: '/resmi-yazi' },
       { title: 'Mevzuat', src: <BookOpen size={20} />, path: '/mevzuat' },
       { title: 'Rehber', src: <Phone size={20} />, path: '/rehber' },
+      { title: 'Envanter', src: <Package size={20} />, path: '/envanter' },
       { title: 'Ayarlar', src: <Settings size={20} />, path: '/ayarlar', gap: true }
     ],
     []
@@ -214,7 +216,7 @@ export const Sidebar = ({ isCollapsed, toggleSidebar }: SidebarProps): React.Rea
             <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 truncate">
               Mevzuat
             </h4>
-            <p className="text-xs text-gray-400 truncate">v3.6.0</p>
+            <p className="text-xs text-gray-400 truncate">v4.0</p>
           </div>
         </div>
       </div>

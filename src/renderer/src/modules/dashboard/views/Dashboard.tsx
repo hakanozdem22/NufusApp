@@ -9,7 +9,8 @@ import {
   Calendar,
   Archive,
   Globe,
-  Car
+  Car,
+  Package
 } from 'lucide-react'
 import { DashboardCard } from '../components/DashboardCard'
 
@@ -114,6 +115,15 @@ export const Dashboard = () => {
           icon={Car}
           colorClass="bg-lime-50 dark:bg-lime-900/20 text-lime-600 dark:text-lime-400"
           path="/tebdil"
+        />
+
+        {/* 12. Envanter */}
+        <DashboardCard
+          title="Envanter"
+          desc="Taşınır kayıt ve malzeme yönetimi"
+          icon={Package}
+          colorClass="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
+          path="/envanter"
         />
       </div>
     </div>

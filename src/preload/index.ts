@@ -134,6 +134,41 @@ const api = {
   createGoogleReport: (data: any) => ipcRenderer.invoke('create-google-report', data),
   savePdf: (buffer: ArrayBuffer, prefix?: string) => ipcRenderer.invoke('save-pdf', { buffer, prefix }),
 
+  // ENVANTER
+  getEnvanterMalzemeler: (criteria: any) => ipcRenderer.invoke('get-envanter-malzemeler', criteria),
+  addEnvanterMalzeme: (data: any) => ipcRenderer.invoke('add-envanter-malzeme', data),
+  updateEnvanterMalzeme: (data: any) => ipcRenderer.invoke('update-envanter-malzeme', data),
+  deleteEnvanterMalzeme: (id: string) => ipcRenderer.invoke('delete-envanter-malzeme', id),
+  getEnvanterSummary: (field: string) => ipcRenderer.invoke('get-envanter-summary', field),
+  
+  // Envanter Tanımlar
+  getEnvanterKategoriler: () => ipcRenderer.invoke('get-envanter-kategoriler'),
+  addEnvanterKategori: (ad: string) => ipcRenderer.invoke('add-envanter-kategori', ad),
+  deleteEnvanterKategori: (id: string) => ipcRenderer.invoke('delete-envanter-kategori', id),
+  updateEnvanterKategori: (data: any) => ipcRenderer.invoke('update-envanter-kategori', data),
+  
+  getEnvanterYerler: () => ipcRenderer.invoke('get-envanter-yerler'),
+  addEnvanterYer: (yer_adi: string) => ipcRenderer.invoke('add-envanter-yer', yer_adi),
+  deleteEnvanterYer: (id: string) => ipcRenderer.invoke('delete-envanter-yer', id),
+  updateEnvanterYer: (data: any) => ipcRenderer.invoke('update-envanter-yer', data),
+  
+  getEnvanterMalzemeTanimlari: () => ipcRenderer.invoke('get-envanter-malzeme-tanimlari'),
+  addEnvanterMalzemeTanim: (data: any) => ipcRenderer.invoke('add-envanter-malzeme-tanim', data),
+  deleteEnvanterMalzemeTanim: (id: string) => ipcRenderer.invoke('delete-envanter-malzeme-tanim', id),
+  updateEnvanterMalzemeTanim: (data: any) => ipcRenderer.invoke('update-envanter-malzeme-tanim', data),
+  
+  getEnvanterMarkaTanimlari: () => ipcRenderer.invoke('get-envanter-marka-tanimlari'),
+  addEnvanterMarkaTanim: (data: any) => ipcRenderer.invoke('add-envanter-marka-tanim', data),
+  deleteEnvanterMarkaTanim: (id: string) => ipcRenderer.invoke('delete-envanter-marka-tanim', id),
+  updateEnvanterMarkaTanim: (data: any) => ipcRenderer.invoke('update-envanter-marka-tanim', data),
+  
+  getEnvanterPersonelTanimlari: () => ipcRenderer.invoke('get-envanter-personel-tanimlari'),
+  addEnvanterPersonelTanim: (ad: string) => ipcRenderer.invoke('add-envanter-personel-tanim', ad),
+  deleteEnvanterPersonelTanim: (id: string) => ipcRenderer.invoke('delete-envanter-personel-tanim', id),
+  updateEnvanterPersonelTanim: (data: any) => ipcRenderer.invoke('update-envanter-personel-tanim', data),
+  
+  createPdfEnvanter: (data: any) => ipcRenderer.invoke('create-pdf-envanter', data),
+  
   // Pencere Kontrolleri
   minimizeWindow: () => ipcRenderer.send('window-minimize'),
   maximizeWindow: () => ipcRenderer.send('window-maximize'),

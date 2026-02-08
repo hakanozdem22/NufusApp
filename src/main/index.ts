@@ -102,7 +102,33 @@ import {
   getEgitimDuzenleyenler,
   addEgitimDuzenleyen,
   updateEgitimDuzenleyen,
-  deleteEgitimDuzenleyen
+  deleteEgitimDuzenleyen,
+  // ENVANTER
+  getEnvanterMalzemeler,
+  addEnvanterMalzeme,
+  updateEnvanterMalzeme,
+  deleteEnvanterMalzeme,
+  getEnvanterSummary,
+  getEnvanterKategoriler,
+  addEnvanterKategori,
+  deleteEnvanterKategori,
+  updateEnvanterKategori, // Add this if missing in database.ts export, I added it manually
+  getEnvanterYerler,
+  addEnvanterYer,
+  deleteEnvanterYer,
+  updateEnvanterYer,
+  getEnvanterMalzemeTanimlari,
+  addEnvanterMalzemeTanim,
+  deleteEnvanterMalzemeTanim,
+  updateEnvanterMalzemeTanim,
+  getEnvanterMarkaTanimlari,
+  addEnvanterMarkaTanim,
+  deleteEnvanterMarkaTanim,
+  updateEnvanterMarkaTanim,
+  getEnvanterPersonelTanimlari,
+  addEnvanterPersonelTanim,
+  deleteEnvanterPersonelTanim,
+  updateEnvanterPersonelTanim
 } from './database'
 
 // Güvenli Protokol
@@ -416,6 +442,7 @@ app.whenReady().then(() => {
   ipcMain.handle('create-pdf-harcama', async (_, data) => handlePdf('harcama_pdf.py', data))
   ipcMain.handle('create-pdf-egitim', async (_, data) => handlePdf('egitim_pdf.py', data))
   ipcMain.handle('create-pdf-arsiv', async (_, data) => handlePdf('arsiv_pdf.py', data))
+  ipcMain.handle('create-pdf-envanter', async (_, data) => handlePdf('envanter_pdf.py', data))
   ipcMain.handle('create-google-report', async (_, data) => {
     return new Promise((resolve, reject) => {
       const scriptPath = is.dev
@@ -508,6 +535,40 @@ app.whenReady().then(() => {
   ipcMain.handle('save-egitim-plan', async (_, v) => saveEgitimPlan(v))
   ipcMain.handle('delete-egitim-plan', async (_, id) => deleteEgitimPlan(id))
   ipcMain.handle('get-egitim-plan-detay', async (_, id) => getEgitimPlanDetay(id))
+
+  // ENVANTER
+  ipcMain.handle('get-envanter-malzemeler', async (_, c) => getEnvanterMalzemeler(c))
+  ipcMain.handle('add-envanter-malzeme', async (_, d) => addEnvanterMalzeme(d))
+  ipcMain.handle('update-envanter-malzeme', async (_, d) => updateEnvanterMalzeme(d))
+  ipcMain.handle('delete-envanter-malzeme', async (_, id) => deleteEnvanterMalzeme(id))
+  ipcMain.handle('get-envanter-summary', async (_, f) => getEnvanterSummary(f))
+  
+  // Envanter Tanımlar
+  ipcMain.handle('get-envanter-kategoriler', async () => getEnvanterKategoriler())
+  ipcMain.handle('add-envanter-kategori', async (_, v) => addEnvanterKategori(v))
+  ipcMain.handle('delete-envanter-kategori', async (_, id) => deleteEnvanterKategori(id))
+  ipcMain.handle('update-envanter-kategori', async (_, v) => updateEnvanterKategori(v.id, v.ad))
+  
+  ipcMain.handle('get-envanter-yerler', async () => getEnvanterYerler())
+  ipcMain.handle('add-envanter-yer', async (_, v) => addEnvanterYer(v))
+  ipcMain.handle('delete-envanter-yer', async (_, id) => deleteEnvanterYer(id))
+  ipcMain.handle('update-envanter-yer', async (_, v) => updateEnvanterYer(v.id, v.yer_adi))
+  
+  ipcMain.handle('get-envanter-malzeme-tanimlari', async () => getEnvanterMalzemeTanimlari())
+  ipcMain.handle('add-envanter-malzeme-tanim', async (_, v) => addEnvanterMalzemeTanim(v))
+  ipcMain.handle('delete-envanter-malzeme-tanim', async (_, id) => deleteEnvanterMalzemeTanim(id))
+  ipcMain.handle('update-envanter-malzeme-tanim', async (_, v) => updateEnvanterMalzemeTanim(v))
+  
+  ipcMain.handle('get-envanter-marka-tanimlari', async () => getEnvanterMarkaTanimlari())
+  ipcMain.handle('add-envanter-marka-tanim', async (_, v) => addEnvanterMarkaTanim(v))
+  ipcMain.handle('delete-envanter-marka-tanim', async (_, id) => deleteEnvanterMarkaTanim(id))
+  ipcMain.handle('update-envanter-marka-tanim', async (_, v) => updateEnvanterMarkaTanim(v))
+  
+  ipcMain.handle('get-envanter-personel-tanimlari', async () => getEnvanterPersonelTanimlari())
+  ipcMain.handle('add-envanter-personel-tanim', async (_, v) => addEnvanterPersonelTanim(v))
+  ipcMain.handle('delete-envanter-personel-tanim', async (_, id) => deleteEnvanterPersonelTanim(id))
+  ipcMain.handle('update-envanter-personel-tanim', async (_, v) => updateEnvanterPersonelTanim(v.id, v.ad))
+  
   ipcMain.handle('select-file', async (_, filters) => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: ['openFile'],

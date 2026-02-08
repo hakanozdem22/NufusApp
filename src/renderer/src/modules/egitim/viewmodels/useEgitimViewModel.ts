@@ -11,7 +11,8 @@ export const useEgitimViewModel = () => {
   // Ayarlar
   const [tarih, setTarih] = useState(new Date().toISOString().split('T')[0])
   const [seciliEgitici, setSeciliEgitici] = useState('')
-  const [seciliDuzenleyen, setSeciliDuzenleyen] = useState('') // YENİ
+  const [seciliDuzenleyen, setSeciliDuzenleyen] = useState('')
+  const [seciliOnaylayan, setSeciliOnaylayan] = useState('') // YENİ: Onaylayan
   const [saatHedefi, setSaatHedefi] = useState('100')
   const [sabahOturum, setSabahOturum] = useState('08:30 - 11:00')
   const [ogleOturum, setOgleOturum] = useState('13:30 - 16:00')
@@ -41,7 +42,6 @@ export const useEgitimViewModel = () => {
     setTimeout(() => setBildirim(null), 3000)
   }
 
-  // Sıralama
   // Sıralama
   const dersSiralama = (a: any, b: any) => {
     // Helper to parse "1.1 - Konu" -> [1, 10]
@@ -137,8 +137,6 @@ export const useEgitimViewModel = () => {
       return 3
     }
   }
-
-  // ...
 
   const robotCalistir = () => {
     if (!seciliEgitici) return mesajGoster('Lütfen önce eğitici seçiniz!', 'hata')
@@ -288,7 +286,9 @@ export const useEgitimViewModel = () => {
           dersler: detay.dersler,
           personeller: detay.personeller,
           duzenleyen:
-            duzenleyenler.find((d) => String(d.id) === String(seciliDuzenleyen)) || null // YENİ: Rapora ekle
+            duzenleyenler.find((d) => String(d.id) === String(seciliDuzenleyen)) || null,
+          onaylayan:
+            duzenleyenler.find((d) => String(d.id) === String(seciliOnaylayan)) || null
         }
 
         if (tip === 'NORMAL') {
@@ -358,6 +358,8 @@ export const useEgitimViewModel = () => {
     setSeciliEgitici,
     seciliDuzenleyen,
     setSeciliDuzenleyen,
+    seciliOnaylayan, // YENİ
+    setSeciliOnaylayan, // YENİ
     saatHedefi,
     setSaatHedefi,
     sabahOturum,
