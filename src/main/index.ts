@@ -444,22 +444,32 @@ app.whenReady().then(() => {
   ipcMain.handle('create-pdf-arsiv', async (_, data) => handlePdf('arsiv_pdf.py', data))
   ipcMain.handle('create-pdf-envanter', async (_, data) => handlePdf('envanter_pdf.py', data))
   ipcMain.handle('create-google-report', async (_, data) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const scriptPath = is.dev
         ? join(__dirname, '../../resources/google_ops.py')
         : join(process.resourcesPath, 'google_ops.py')
       const resourcePath = is.dev ? join(__dirname, '../../resources') : process.resourcesPath
-      const finalData = { ...data, resource_path: resourcePath }
+      const desktopPath = app.getPath('desktop')
+      const finalData = { ...data, resource_path: resourcePath, desktop_path: desktopPath }
       const pythonProcess = spawn('python', [scriptPath])
       let dataString = ''
+      let errorString = ''
       pythonProcess.stdin.write(JSON.stringify(finalData))
       pythonProcess.stdin.end()
       pythonProcess.stdout.on('data', (d) => (dataString += d.toString()))
-      pythonProcess.on('close', () => {
+      pythonProcess.stderr.on('data', (d) => {
+        errorString += d.toString()
+        console.error('Google Report Python Stderr:', d.toString())
+      })
+      pythonProcess.on('close', (code) => {
+        if (code !== 0 || !dataString.trim()) {
+          resolve(JSON.stringify({ success: false, error: errorString || 'Python script hata ile kapandı' }))
+          return
+        }
         try {
           resolve(dataString)
         } catch (_e) {
-          reject('Python Hata')
+          resolve(JSON.stringify({ success: false, error: 'Yanıt işlenemedi' }))
         }
       })
     })
@@ -518,7 +528,7 @@ app.whenReady().then(() => {
   ipcMain.handle('get-egitim-konular', async () => getEgitimKonular())
   ipcMain.handle('add-egitim-konu', async (_, v) => addEgitimKonu(v))
   ipcMain.handle('delete-egitim-konu', async (_, id) => deleteEgitimKonu(id))
-  ipcMain.handle('update-egitim-konu', async (_, v) => updateEgitimKonu(v.id, v.baslik))
+  ipcMain.handle('update-egitim-konu', async (_, v) => updateEgitimKonu(v.id, v.baslik, v.sira))
   ipcMain.handle('get-egitim-egiticiler', async () => getEgitimEgiticiler())
   ipcMain.handle('add-egitim-egitici', async (_, v) => addEgitimEgitici(v))
   ipcMain.handle('delete-egitim-egitici', async (_, id) => deleteEgitimEgitici(id))

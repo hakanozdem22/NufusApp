@@ -47,6 +47,8 @@ export const EgitimRobotu = () => {
         setOgleOturum={vm.setOgleOturum}
         zorunluDersler={vm.zorunluDersler}
         zorunluDersToggle={vm.zorunluDersToggle}
+        zorunluTumunuSec={vm.zorunluTumunuSec}
+        zorunluTumunuTemizle={vm.zorunluTumunuTemizle}
         zorunluDersMenuAcik={vm.zorunluDersMenuAcik}
         setZorunluDersMenuAcik={vm.setZorunluDersMenuAcik}
         konular={vm.konular}

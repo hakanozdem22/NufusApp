@@ -4,7 +4,7 @@ import os
 import datetime
 import requests
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 
 # --- AYARLAR (BURALARI DOLDURUN) ---
 # Lütfen kendi oluşturduğunuz Google E-Tablo ID'lerini buraya yapıştırın
@@ -45,7 +45,7 @@ def run_process(data_json):
         desktop_path = payload.get('desktop_path')  # Electron'dan gelen masaüstü yolu
         
         # 1. Google Bağlantısı
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        scopes = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         
         # Anahtar dosyasını bul
         key_path = os.path.join(resource_path, 'anahtar.json')
@@ -56,7 +56,7 @@ def run_process(data_json):
         if not os.path.exists(key_path):
             return {"success": False, "error": f"anahtar.json bulunamadı! Yol: {key_path}"}
 
-        creds = ServiceAccountCredentials.from_json_keyfile_name(key_path, scope)
+        creds = Credentials.from_service_account_file(key_path, scopes=scopes)
         client = gspread.authorize(creds)
 
         # 2. İşlem Tipine Göre Veri Gönderimi
@@ -196,10 +196,12 @@ def run_process(data_json):
             file_prefix = "EK-3"
 
         # 3. PDF İndirme
-        if creds.access_token_expired:
-            client.login()
+        # google-auth ile token yenileme
+        if not creds.valid:
+            from google.auth.transport.requests import Request
+            creds.refresh(Request())
         
-        token = creds.get_access_token().access_token
+        token = creds.token
         # Dikey (Portrait) A4
         url = f"https://docs.google.com/spreadsheets/d/{target_sheet_id}/export?format=pdf&portrait=true&size=A4&gridlines=true&scale=4"
         
@@ -220,13 +222,25 @@ def run_process(data_json):
             return {"success": False, "error": f"Google İndirme Hatası: {response.status_code}"}
 
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        import traceback
+        err_detail = traceback.format_exc()
+        print(err_detail, file=sys.stderr)
+        return {"success": False, "error": f"{type(e).__name__}: {str(e)}"}
 
 if __name__ == "__main__":
     try: sys.stdin.reconfigure(encoding='utf-8')
     except: pass
     
-    input_data = sys.stdin.read()
-    if input_data:
-        result = run_process(input_data)
-        print(json.dumps(result))
+    try:
+        input_data = sys.stdin.read()
+        if input_data:
+            result = run_process(input_data)
+            if result is None:
+                result = {"success": False, "error": "Script sonuç döndürmedi"}
+            print(json.dumps(result, ensure_ascii=False))
+        else:
+            print(json.dumps({"success": False, "error": "Girdi verisi boş"}, ensure_ascii=False))
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc(), file=sys.stderr)
+        print(json.dumps({"success": False, "error": f"Genel hata: {type(e).__name__}: {str(e)}"}, ensure_ascii=False))

@@ -1,6 +1,7 @@
 export interface EgitimKonu {
   id: number
   baslik: string
+  sira?: number
 }
 
 export interface EgitimPlan {

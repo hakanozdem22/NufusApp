@@ -11,7 +11,8 @@ import {
   Moon,
   Edit,
   Check,
-  X
+  X,
+  RefreshCw
 } from 'lucide-react'
 import { useSettingsViewModel } from '../viewmodels/useSettingsViewModel'
 
@@ -33,7 +34,9 @@ export const EgitimSettings = () => {
     egitimPersonelEkle,
     egitimPersonelSil,
     egitimPersonelGuncelle, // ADDED
-    bildirim
+    bildirim,
+    getEgitimData, // ADDED for refresh
+    mesajGoster // ADDED for error messages
     // personeller // REMOVED (Unused)
   } = useSettingsViewModel()
 
@@ -642,14 +645,23 @@ export const EgitimSettings = () => {
 
       {/* 3. KONULAR */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
-          <BookOpen className="text-teal-600 dark:text-teal-400" size={24} />
-          <div>
-            <h3 className="text-lg font-bold text-gray-800 dark:text-white">Eğitim Konuları</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-xs">
-              Standart eğitim konu başlıklarını yönetin.
-            </p>
+        <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <BookOpen className="text-teal-600 dark:text-teal-400" size={24} />
+            <div>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white">Eğitim Konuları</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-xs">
+                Standart eğitim konu başlıklarını yönetin.
+              </p>
+            </div>
           </div>
+          <button
+            onClick={() => getEgitimData()}
+            className="p-2 text-gray-500 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
+            title="Sıraya Göre Yenile"
+          >
+            <RefreshCw size={20} />
+          </button>
         </div>
         <div className="p-6">
           <div className="p-6">
@@ -701,11 +713,37 @@ export const EgitimSettings = () => {
                       key={item.id}
                       className={`px-4 py-3 flex items-center justify-between transition-colors ${duzenlenenKonuId === item.id ? 'bg-orange-50 dark:bg-orange-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}
                     >
-                      <span
-                        className={`text-gray-700 dark:text-gray-200 font-medium text-sm ${duzenlenenKonuId === item.id ? 'text-orange-900 dark:text-orange-100' : ''}`}
-                      >
-                        {item.baslik}
-                      </span>
+                      <div className="flex items-center gap-3 flex-1">
+                        <input
+                          type="number"
+                          defaultValue={item.sira ?? ''}
+                          placeholder="#"
+                          onBlur={(e) => {
+                            const newSira = e.target.value ? parseInt(e.target.value) : undefined
+                            if (newSira !== item.sira) {
+                              // Duplicate check
+                              if (newSira !== undefined) {
+                                const duplicate = egitimKonular.find(
+                                  (k) => k.id !== item.id && k.sira === newSira
+                                )
+                                if (duplicate) {
+                                  mesajGoster(`Bu sıra numarası (${newSira}) zaten "${duplicate.baslik}" konusuna verilmiş!`, 'hata')
+                                  e.target.value = item.sira?.toString() ?? ''
+                                  return
+                                }
+                              }
+                              konuGuncelle(item.id, item.baslik, newSira)
+                            }
+                          }}
+                          className="w-16 px-2 py-1 text-center text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-teal-100 focus:border-teal-400 outline-none"
+                          title="Sıra numarası"
+                        />
+                        <span
+                          className={`text-gray-700 dark:text-gray-200 font-medium text-sm ${duzenlenenKonuId === item.id ? 'text-orange-900 dark:text-orange-100' : ''}`}
+                        >
+                          {item.baslik}
+                        </span>
+                      </div>
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => baslaDuzenle(item.id, item.baslik)}

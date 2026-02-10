@@ -42,41 +42,12 @@ export const useEgitimViewModel = () => {
     setTimeout(() => setBildirim(null), 3000)
   }
 
-  // Sıralama
+  // Sıralama - Sıra numarasına göre
   const dersSiralama = (a: any, b: any) => {
-    // Helper to parse "1.1 - Konu" -> [1, 10]
-    const getParts = (str: string) => {
-      try {
-        const code = str.split(' - ')[0].trim()
-        const partsStr = code.split('.')
-        const parts: number[] = []
-
-        partsStr.forEach((p, i) => {
-          // Noktadan sonraki ilk eleman (index 1) tek haneli ise sonuna 0 ekle
-          if (i === 1 && p.length === 1) {
-            parts.push(parseInt(p + '0'))
-          } else {
-            parts.push(parseInt(p))
-          }
-        })
-        return parts
-      } catch {
-        return [9999]
-      }
-    }
-
-    const partsA = getParts(a.baslik)
-    const partsB = getParts(b.baslik)
-
-    // Parça parça karşılaştır
-    const len = Math.max(partsA.length, partsB.length)
-    for (let i = 0; i < len; i++) {
-      const valA = partsA[i] !== undefined ? partsA[i] : 0
-      const valB = partsB[i] !== undefined ? partsB[i] : 0
-      if (valA !== valB) return valA - valB
-    }
-
-    return a.baslik.localeCompare(b.baslik)
+    const siraA = a.sira ?? 9999
+    const siraB = b.sira ?? 9999
+    if (siraA !== siraB) return siraA - siraB
+    return (a.baslik || '').localeCompare(b.baslik || '')
   }
 
   // Veri Çekme
@@ -110,11 +81,29 @@ export const useEgitimViewModel = () => {
     else setManSaat(`${sabahOturum} / ${ogleOturum}`) // Bilgi amaçlı
   }, [manOturumSecimi, sabahOturum, ogleOturum])
 
+  // Eğitici seçildiğinde otomatik onaylayan olarak da ayarla
+  useEffect(() => {
+    if (seciliEgitici) {
+      setSeciliOnaylayan(seciliEgitici)
+    }
+  }, [seciliEgitici])
+
   // Fonksiyonlar
   const zorunluDersToggle = (baslik: string) => {
-    if (zorunluDersler.includes(baslik))
-      setZorunluDersler(zorunluDersler.filter((z) => z !== baslik))
-    else setZorunluDersler([...zorunluDersler, baslik])
+    setZorunluDersler((prev) => {
+      const newList = prev.includes(baslik)
+        ? prev.filter((z) => z !== baslik)
+        : [...prev, baslik]
+      return newList
+    })
+  }
+
+  const zorunluTumunuSec = () => {
+    setZorunluDersler(konular.map((k) => k.baslik))
+  }
+
+  const zorunluTumunuTemizle = () => {
+    setZorunluDersler([])
   }
 
   // YARDIMCI: Saat Aralığından Süre Hesapla (Örn: "08:30 - 11:00" -> 2.5)
@@ -140,71 +129,82 @@ export const useEgitimViewModel = () => {
 
   const robotCalistir = () => {
     if (!seciliEgitici) return mesajGoster('Lütfen önce eğitici seçiniz!', 'hata')
-    const currentDate = new Date(tarih)
-    let totalHours = 0
+
     const targetHours = parseInt(saatHedefi) || 100
     const newSchedule: EgitimDers[] = []
 
-    // ID karşılaştırması string güvenli olsun
+    // Eğitici bilgisi
     const egiticiObj = personelListesi.find((p) => String(p.id) === String(seciliEgitici))
     const egiticiAd = egiticiObj
-      ? `${egiticiObj.ad_soyad} ${egiticiObj.unvan ? ' - ' + egiticiObj.unvan : ''}`
+      ? `${egiticiObj.ad_soyad}${egiticiObj.unvan ? ' - ' + egiticiObj.unvan : ''}`
       : 'Bilinmiyor'
 
-    // 1. LİSTELERİ HAZIRLA
-    // Zorunlular ve Adaylar
-    const zorunluKonuObjeleri = konular.filter((k) => zorunluDersler.includes(k.baslik))
+    // Her konu için günlük toplam saat (sabah + öğle)
+    const saatPerKonu = calculateDuration(sabahOturum) + calculateDuration(ogleOturum)
+
+    // 1. ZORUNLU DERSLER — Bunlar kesinlikle dahil olacak
+    const zorunluKonuObjeleri = konular
+      .filter((k) => zorunluDersler.includes(k.baslik))
+      .sort(dersSiralama)
+
+    // 2. KALAN SAATLERİ HESAPLA
+    const zorunluSaat = zorunluKonuObjeleri.length * saatPerKonu
+    const kalanSaat = Math.max(0, targetHours - zorunluSaat)
+    const gerekenEkKonu = Math.ceil(kalanSaat / saatPerKonu)
+
+    // 3. ADAY KONULARDAN KARIŞIK SEÇ (Fisher-Yates Shuffle)
     const adayKonular = konular.filter((k) => !zorunluDersler.includes(k.baslik))
+    const karisikAdaylar = [...adayKonular]
+    for (let i = karisikAdaylar.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[karisikAdaylar[i], karisikAdaylar[j]] = [karisikAdaylar[j], karisikAdaylar[i]]
+    }
+    const secilenAdaylar = karisikAdaylar.slice(0, gerekenEkKonu)
 
-    // 2. KAÇ DERS LAZIM?
-    const approximateLessonCount = Math.ceil(targetHours / 3)
-    const gerekenEkDers = Math.max(0, approximateLessonCount - zorunluKonuObjeleri.length)
+    // 4. BİRLEŞTİR VE SIRA NUMARASINA GÖRE SIRALA
+    const tamHavuz = [...zorunluKonuObjeleri, ...secilenAdaylar].sort(dersSiralama)
 
-    // 3. KARIŞIK SEÇ (Shuffle)
-    const karisikAdaylar = [...adayKonular].sort(() => 0.5 - Math.random())
-    const eklenenler = karisikAdaylar.slice(0, gerekenEkDers)
+    // 5. PROGRAMI OLUŞTUR — Tüm havuzu kullan (zorunlular kesinlikle dahil)
+    const currentDate = new Date(tarih)
+    let totalHours = 0
 
-    // 4. BİRLEŞTİR VE ID'YE GÖRE SIRALA
-    const birlesikHavuz = [...zorunluKonuObjeleri, ...eklenenler]
-    const siraliHavuz = birlesikHavuz.sort(dersSiralama).map((k) => k.baslik)
-
-    // İşlenecek havuz artık bu
-    const havuz = siraliHavuz
-    let subjectIdx = 0
-
-    while (totalHours < targetHours && subjectIdx < havuz.length) {
-      const day = currentDate.getDay()
-      if (day === 0 || day === 6) {
+    for (let idx = 0; idx < tamHavuz.length; idx++) {
+      // Hafta sonlarını atla
+      while (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
         currentDate.setDate(currentDate.getDate() + 1)
-        continue
       }
-      const dateStr = currentDate.toISOString().split('T')[0]
 
-      // Sabah Grubu
+      const dateStr = currentDate.toISOString().split('T')[0]
+      const konu = tamHavuz[idx]
+      const isZorunlu = zorunluDersler.includes(konu.baslik)
+
+      // Sabah Oturumu
       newSchedule.push({
-        konu: havuz[subjectIdx],
+        konu: konu.baslik,
         egitici: egiticiAd,
         tarih: dateStr,
         saat: sabahOturum,
-        zorunlu: false
+        zorunlu: isZorunlu
       })
       totalHours += calculateDuration(sabahOturum)
 
-      // Öğle Grubu (Aynı Konu)
+      // Öğle Oturumu (Aynı Konu)
       newSchedule.push({
-        konu: havuz[subjectIdx],
+        konu: konu.baslik,
         egitici: egiticiAd,
         tarih: dateStr,
         saat: ogleOturum,
-        zorunlu: false
+        zorunlu: isZorunlu
       })
       totalHours += calculateDuration(ogleOturum)
 
-      subjectIdx++ // Sıradaki konu (ID sıralı listeden)
       currentDate.setDate(currentDate.getDate() + 1)
     }
+
     setTaslak(newSchedule)
-    mesajGoster(`Taslak plan oluşturuldu. Tahmini Toplam: ${totalHours.toFixed(1)} Saat`)
+    mesajGoster(
+      `Taslak oluşturuldu: ${tamHavuz.length} konu, ${totalHours.toFixed(1)} saat (${zorunluKonuObjeleri.length} zorunlu)`
+    )
   }
 
   const manuelEkle = () => {
@@ -309,7 +309,13 @@ export const useEgitimViewModel = () => {
         } else {
           const googleData = { tip: tip, veri: raporData }
           const sonucStr = await window.api.createGoogleReport(googleData)
-          const sonuc = JSON.parse(sonucStr)
+          console.log('Google Report Raw Response:', sonucStr)
+          let sonuc
+          try {
+            sonuc = JSON.parse(sonucStr)
+          } catch {
+            sonuc = { success: false, error: sonucStr || 'Yanıt alınamadı' }
+          }
 
           if (sonuc.success) {
             mesajGoster(`Başarılı! Dosya indirildi.`)
@@ -318,8 +324,9 @@ export const useEgitimViewModel = () => {
               window.api.openFile(sonuc.path)
             }
           } else {
-            console.error(sonuc.error)
-            mesajGoster(`HATA: ${sonuc.error}`, 'hata')
+            const errorMsg = sonuc.error || 'Bilinmeyen hata'
+            console.error('Google Report Error:', errorMsg)
+            mesajGoster(`HATA: ${errorMsg}`, 'hata')
           }
         }
       }
@@ -387,6 +394,8 @@ export const useEgitimViewModel = () => {
     silinecekId,
     setSilinecekId,
     zorunluDersToggle,
+    zorunluTumunuSec,
+    zorunluTumunuTemizle,
     robotCalistir,
     manuelEkle,
     kaydetButonunaBasildi,

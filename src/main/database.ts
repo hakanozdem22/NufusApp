@@ -268,13 +268,18 @@ export async function deleteEvrak(id: string): Promise<boolean> {
 
 export async function getEgitimKonular(): Promise<any[]> {
   const snapshot = await getDocs(collection(db, 'egitim_konular'))
-  // ID sıralaması yerine oluşturma sırası veya alfabetik
-  return snapshot.docs.map(formatDoc).sort((a: any, b: any) => a.baslik?.localeCompare(b.baslik))
+  // Sıra numarasına göre sırala, yoksa alfabetik
+  return snapshot.docs.map(formatDoc).sort((a: any, b: any) => {
+    const siraA = a.sira ?? 9999
+    const siraB = b.sira ?? 9999
+    if (siraA !== siraB) return siraA - siraB
+    return a.baslik?.localeCompare(b.baslik)
+  })
 }
 
-export async function addEgitimKonu(baslik: string): Promise<any> {
-  const res = await addDoc(collection(db, 'egitim_konular'), { baslik })
-  return { id: res.id, baslik }
+export async function addEgitimKonu(baslik: string, sira?: number): Promise<any> {
+  const res = await addDoc(collection(db, 'egitim_konular'), { baslik, sira: sira ?? null })
+  return { id: res.id, baslik, sira }
 }
 
 export async function deleteEgitimKonu(id: string): Promise<boolean> {
@@ -282,8 +287,8 @@ export async function deleteEgitimKonu(id: string): Promise<boolean> {
   return true
 }
 
-export async function updateEgitimKonu(id: string, baslik: string): Promise<boolean> {
-  await updateDoc(doc(db, 'egitim_konular', id), { baslik })
+export async function updateEgitimKonu(id: string, baslik: string, sira?: number): Promise<boolean> {
+  await updateDoc(doc(db, 'egitim_konular', id), { baslik, sira: sira ?? null })
   return true
 }
 

@@ -255,7 +255,7 @@ export const useSettingsViewModel = () => {
   }
 
   /* EĞİTİM AYARLARI */
-  const [egitimKonular, setEgitimKonular] = useState<{ id: number; baslik: string }[]>([])
+  const [egitimKonular, setEgitimKonular] = useState<{ id: number; baslik: string; sira?: number }[]>([])
   const [egitimEgiticiler, setEgitimEgiticiler] = useState<
     { id: number; ad_soyad: string; unvan: string }[]
   >([])
@@ -312,11 +312,11 @@ export const useSettingsViewModel = () => {
     }
   }
 
-  const konuGuncelle = async (id: number, baslik: string) => {
+  const konuGuncelle = async (id: number, baslik: string, sira?: number) => {
     if (!baslik) return
     try {
       if (window.api) {
-        await window.api.updateEgitimKonu({ id, baslik })
+        await window.api.updateEgitimKonu({ id, baslik, sira })
         mesajGoster('Konu güncellendi.')
         getEgitimData()
       }
@@ -498,6 +498,8 @@ export const useSettingsViewModel = () => {
     duzenleyenEkle,
     duzenleyenSil,
     duzenleyenGuncelle,
+    getEgitimData,
+    mesajGoster,
 
     // Profil
     profileImage,
