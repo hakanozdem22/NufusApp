@@ -1,0 +1,141 @@
+﻿[93m[4mUnused files[24m[39m (125)
+src/preload/index.d.ts                                                                          
+src/renderer/src/App.tsx                                                                        
+src/renderer/src/env.d.ts                                                                       
+src/renderer/src/main.tsx                                                                       
+src/renderer/src/modules/auth/Login.tsx                                                         
+src/renderer/src/modules/envanter/types.ts                                                      
+src/renderer/src/shared/components/ModernCombobox.tsx                                           
+src/renderer/src/shared/components/Sidebar.tsx                                                  
+src/renderer/src/shared/components/TitleBar.tsx                                                 
+src/renderer/src/shared/components/Toast.tsx                                                    
+src/renderer/src/shared/context/ThemeContext.tsx                                                
+src/renderer/src/shared/layouts/MainLayout.tsx                                                  
+src/renderer/src/modules/arsiv/components/ArsivBulkUpdateModal.tsx                              
+src/renderer/src/modules/arsiv/components/ArsivExcelImportModal.tsx                             
+src/renderer/src/modules/arsiv/components/ArsivFormModal.tsx                                    
+src/renderer/src/modules/arsiv/components/ArsivHeader.tsx                                       
+src/renderer/src/modules/arsiv/components/ArsivModals.tsx                                       
+src/renderer/src/modules/arsiv/components/ArsivReportModal.tsx                                  
+src/renderer/src/modules/arsiv/components/ArsivTable.tsx                                        
+src/renderer/src/modules/arsiv/components/ArsivToolbar.tsx                                      
+src/renderer/src/modules/arsiv/models/arsiv-types.ts                                            
+src/renderer/src/modules/arsiv/viewmodels/useArsivViewModel.ts                                  
+src/renderer/src/modules/arsiv/views/Arsiv.tsx                                                  
+src/renderer/src/modules/dashboard/components/DashboardCard.tsx                                 
+src/renderer/src/modules/dashboard/views/Dashboard.tsx                                          
+src/renderer/src/modules/egitim/components/EgitimDraftPanel.tsx                                 
+src/renderer/src/modules/egitim/components/EgitimModals.tsx                                     
+src/renderer/src/modules/egitim/components/EgitimSavedPanel.tsx                                 
+src/renderer/src/modules/egitim/components/EgitimSettingsPanel.tsx                              
+src/renderer/src/modules/egitim/components/Ek2Report.tsx                                        
+src/renderer/src/modules/egitim/components/Ek3Report.tsx                                        
+src/renderer/src/modules/egitim/models/egitim-types.ts                                          
+src/renderer/src/modules/egitim/services/GoogleService.ts                                       
+src/renderer/src/modules/egitim/viewmodels/useEgitimViewModel.ts                                
+src/renderer/src/modules/egitim/views/EgitimRobotu.tsx                                          
+src/renderer/src/modules/egitim/views/Ek2View.tsx                                               
+src/renderer/src/modules/egitim/views/Ek3View.tsx                                               
+src/renderer/src/modules/dis_iliskiler/views/DisIliskilerDashboard.tsx                          
+src/renderer/src/modules/envanter/components/EnvanterImportModal.tsx                            
+src/renderer/src/modules/envanter/views/EnvanterDashboard.tsx                                   
+src/renderer/src/modules/envanter/views/EnvanterSettings.tsx                                    
+src/renderer/src/modules/mevzuat/components/MevzuatHeader.tsx                                   
+src/renderer/src/modules/mevzuat/components/MevzuatWebview.tsx                                  
+src/renderer/src/modules/mevzuat/viewmodels/useMevzuatViewModel.ts                              
+src/renderer/src/modules/mevzuat/views/Mevzuat.tsx                                              
+src/renderer/src/modules/e_apostil/components/EApostilFormModal.tsx                             
+src/renderer/src/modules/e_apostil/components/EApostilHeader.tsx                                
+src/renderer/src/modules/e_apostil/components/EApostilList.tsx                                  
+src/renderer/src/modules/e_apostil/components/EApostilModals.tsx                                
+src/renderer/src/modules/e_apostil/models/apostil-types.ts                                      
+src/renderer/src/modules/e_apostil/viewmodels/useEApostilViewModel.ts                           
+src/renderer/src/modules/e_apostil/views/EApostil.tsx                                           
+src/renderer/src/modules/personel_isleri/views/PersonelIsleriDashboard.tsx                      
+src/renderer/src/modules/personel_harcama/models/Harcama.ts                                     
+src/renderer/src/modules/personel_harcama/viewmodels/useHarcama.ts                              
+src/renderer/src/modules/personel_harcama/views/HarcamaListesi.tsx                              
+src/renderer/src/modules/personel_terfi/components/PersonelFormModal.tsx                        
+src/renderer/src/modules/personel_terfi/components/TerfiHeader.tsx                              
+src/renderer/src/modules/personel_terfi/components/TerfiTable.tsx                               
+src/renderer/src/modules/personel_terfi/models/personel-terfi-types.ts                          
+src/renderer/src/modules/personel_terfi/viewmodels/usePersonelTerfiViewModel.ts                 
+src/renderer/src/modules/personel_terfi/views/PersonelTerfi.tsx                                 
+src/renderer/src/modules/posta_zimmet/components/ZimmetArsivListe.tsx                           
+src/renderer/src/modules/posta_zimmet/components/ZimmetGirisForm.tsx                            
+src/renderer/src/modules/posta_zimmet/components/ZimmetModals.tsx                               
+src/renderer/src/modules/posta_zimmet/components/ZimmetPdfDocument.tsx                          
+src/renderer/src/modules/posta_zimmet/components/ZimmetYazdirListe.tsx                          
+src/renderer/src/modules/posta_zimmet/models/zimmet-types.ts                                    
+src/renderer/src/modules/posta_zimmet/viewmodels/usePostaZimmetViewModel.ts                     
+src/renderer/src/modules/posta_zimmet/views/PostaZimmet.tsx                                     
+src/renderer/src/modules/rehber/components/RehberCard.tsx                                       
+src/renderer/src/modules/rehber/components/RehberFormModal.tsx                                  
+src/renderer/src/modules/rehber/models/rehber-types.ts                                          
+src/renderer/src/modules/rehber/viewmodels/useRehberViewModel.ts                                
+src/renderer/src/modules/rehber/views/RehberListesi.tsx                                         
+src/renderer/src/modules/resmi_yazi/components/EvrakDeleteModal.tsx                             
+src/renderer/src/modules/resmi_yazi/components/EvrakFormModal.tsx                               
+src/renderer/src/modules/resmi_yazi/components/EvrakHeader.tsx                                  
+src/renderer/src/modules/resmi_yazi/components/EvrakListTable.tsx                               
+src/renderer/src/modules/resmi_yazi/models/evrak-types.ts                                       
+src/renderer/src/modules/resmi_yazi/viewmodels/useResmiYaziViewModel.ts                         
+src/renderer/src/modules/resmi_yazi/views/ResmiYazi.tsx                                         
+src/renderer/src/modules/settings/components/DeleteConfirmModal.tsx                             
+src/renderer/src/modules/settings/components/SettingsForm.tsx                                   
+src/renderer/src/modules/settings/components/SettingsHeader.tsx                                 
+src/renderer/src/modules/settings/viewmodels/useArsivSettings.ts                                
+src/renderer/src/modules/settings/viewmodels/useEgitimSettings.ts                               
+src/renderer/src/modules/settings/viewmodels/useKurumSettings.ts                                
+src/renderer/src/modules/settings/viewmodels/useProfileSettings.ts                              
+src/renderer/src/modules/settings/views/AboutSettings.tsx                                       
+src/renderer/src/modules/settings/views/ApiKeysSettings.tsx                                     
+src/renderer/src/modules/settings/views/ArsivSettings.tsx                                       
+src/renderer/src/modules/settings/views/EgitimSettings.tsx                                      
+src/renderer/src/modules/settings/views/GeneralSettings.tsx                                     
+src/renderer/src/modules/settings/views/HarcamaSettings.tsx                                     
+src/renderer/src/modules/settings/views/KurumSettings.tsx                                       
+src/renderer/src/modules/settings/views/ProfileSettings.tsx                                     
+src/renderer/src/modules/settings/views/Settings.tsx                                            
+src/renderer/src/modules/surucu_belgesi/views/SurucuBelgesiDashboard.tsx                        
+src/renderer/src/modules/takvim/components/TakvimDetailModal.tsx                                
+src/renderer/src/modules/takvim/components/TakvimGrid.tsx                                       
+src/renderer/src/modules/takvim/components/TakvimHeader.tsx                                     
+src/renderer/src/modules/takvim/components/TakvimSidebar.tsx                                    
+src/renderer/src/modules/takvim/models/takvim-types.ts                                          
+src/renderer/src/modules/takvim/viewmodels/useTakvimViewModel.ts                                
+src/renderer/src/modules/takvim/views/Takvim.tsx                                                
+src/renderer/src/modules/tebdil/components/TebdilFormModal.tsx                                  
+src/renderer/src/modules/tebdil/components/TebdilHeader.tsx                                     
+src/renderer/src/modules/tebdil/components/TebdilList.tsx                                       
+src/renderer/src/modules/tebdil/components/TebdilModals.tsx                                     
+src/renderer/src/modules/tebdil/models/tebdil-types.ts                                          
+src/renderer/src/modules/tebdil/viewmodels/useTebdilViewModel.ts                                
+src/renderer/src/modules/tebdil/views/Tebdil.tsx                                                
+src/renderer/src/modules/turk_yurtdisi_temsilcilikleri/components/TurkTemsilcilikCard.tsx       
+src/renderer/src/modules/turk_yurtdisi_temsilcilikleri/components/TurkTemsilcilikModal.tsx      
+src/renderer/src/modules/turk_yurtdisi_temsilcilikleri/models/turk-temsilcilik-data.ts          
+src/renderer/src/modules/turk_yurtdisi_temsilcilikleri/models/turk-temsilcilik-types.ts         
+src/renderer/src/modules/turk_yurtdisi_temsilcilikleri/viewmodels/useTurkTemsilcilikViewModel.ts
+src/renderer/src/modules/turk_yurtdisi_temsilcilikleri/views/TurkYurtdisiTemsilcilikleri.tsx    
+src/renderer/src/modules/yabanci_temsilcilikler/components/TemsilcilikCard.tsx                  
+src/renderer/src/modules/yabanci_temsilcilikler/components/TemsilcilikModal.tsx                 
+src/renderer/src/modules/yabanci_temsilcilikler/models/temsilcilik-data.ts                      
+src/renderer/src/modules/yabanci_temsilcilikler/models/temsilcilik-types.ts                     
+src/renderer/src/modules/yabanci_temsilcilikler/viewmodels/useTemsilcilikViewModel.ts           
+src/renderer/src/modules/yabanci_temsilcilikler/views/YabanciTemsilcilikler.tsx                 
+[93m[4mUnused dependencies[24m[39m (5)
+@react-pdf/renderer  package.json:26:6
+lucide-react         package.json:29:6
+playwright           package.json:30:6
+react-router-dom     package.json:31:6
+xlsx                 package.json:33:6
+[93m[4mUnused devDependencies[24m[39m (4)
+@types/react      package.json:40:6
+@types/react-dom  package.json:41:6
+react             package.json:53:6
+react-dom         package.json:54:6
+[93m[4mUnused exports[24m[39m (2)
+INITIAL_TEMSILCILIKLER        src/main/db/yabanci_temsilcilikler.ts:18:14
+INITIAL_TURK_TEMSILCILIKLERI  src/main/db/turk_temsilcilikleri.ts:16:14  
+[33m[4mConfiguration hints[24m (1)[39m
