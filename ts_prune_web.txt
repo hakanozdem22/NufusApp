@@ -1,0 +1,13 @@
+﻿\src\renderer\src\modules\envanter\types.ts:25 - EnvanterMalzemeTanim
+\src\renderer\src\modules\envanter\types.ts:31 - EnvanterMarkaTanim
+\src\renderer\src\modules\egitim\services\GoogleService.ts:2 - GoogleSheetData (used in module)
+\src\renderer\src\modules\egitim\services\GoogleService.ts:8 - GoogleFile (used in module)
+\src\renderer\src\modules\egitim\services\GoogleService.ts:15 - GoogleService (used in module)
+\src\renderer\src\modules\egitim\views\Ek2View.tsx:8 - Ek2View
+\src\renderer\src\modules\egitim\views\Ek3View.tsx:8 - Ek3View
+\src\renderer\src\modules\personel_harcama\viewmodels\useHarcama.ts:4 - useHarcama
+\src\renderer\src\modules\settings\components\SettingsForm.tsx:10 - SettingsForm
+\src\renderer\src\modules\settings\components\SettingsHeader.tsx:3 - SettingsHeader
+\src\renderer\src\modules\settings\views\ApiKeysSettings.tsx:5 - ApiKeysSettings
+\src\renderer\src\modules\tebdil\models\tebdil-types.ts:155 - EKLENECEK_ULKELER_LISTESI
+\src\renderer\src\modules\yabanci_temsilcilikler\models\temsilcilik-types.ts:141 - EKLENECEK_TEMSILCILIKLER

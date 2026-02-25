@@ -1,0 +1,20 @@
+﻿
+> mevzuat@10.0.0 typecheck
+> npm run typecheck:node && npm run typecheck:web
+
+
+> mevzuat@10.0.0 typecheck:node
+> tsc --noEmit -p tsconfig.node.json --composite false
+
+
+> mevzuat@10.0.0 typecheck:web
+> tsc --noEmit -p tsconfig.web.json --composite false
+
+src/renderer/src/modules/arsiv/components/ArsivExcelImportModal.tsx(48,17): error TS6133: 'headers' is declared but its value is never read.
+src/renderer/src/modules/egitim/components/EgitimDraftPanel.tsx(1,53): error TS6133: 'CheckCircle2' is declared but its value is never read.
+src/renderer/src/modules/egitim/components/EgitimSavedPanel.tsx(2,16): error TS6133: 'List' is declared but its value is never read.
+src/renderer/src/modules/egitim/components/EgitimSavedPanel.tsx(2,94): error TS6133: 'MoreVertical' is declared but its value is never read.
+src/renderer/src/modules/egitim/components/Ek3Report.tsx(24,11): error TS6133: 'EmptyCell' is declared but its value is never read.
+src/renderer/src/modules/envanter/components/EnvanterImportModal.tsx(13,12): error TS6133: 'selectedTable' is declared but its value is never read.
+src/renderer/src/modules/envanter/views/EnvanterDashboard.tsx(403,10): error TS6133: 'importBtnText' is declared but its value is never read.
+src/renderer/src/modules/envanter/views/EnvanterDashboard.tsx(406,14): error TS2304: Cannot find name 'Check'.

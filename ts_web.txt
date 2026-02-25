@@ -1,0 +1,12 @@
+﻿src/renderer/src/modules/arsiv/components/ArsivExcelImportModal.tsx(48,17): error TS6133: 'headers' is declared but its value is never read.
+src/renderer/src/modules/egitim/components/EgitimDraftPanel.tsx(1,53): error TS6133: 'CheckCircle2' is declared but its value is never read.
+src/renderer/src/modules/egitim/components/EgitimSavedPanel.tsx(2,16): error TS6133: 'List' is declared but its value is never read.
+src/renderer/src/modules/egitim/components/EgitimSavedPanel.tsx(2,94): error TS6133: 'MoreVertical' is declared but its value is never read.
+src/renderer/src/modules/egitim/components/Ek3Report.tsx(24,11): error TS6133: 'EmptyCell' is declared but its value is never read.
+src/renderer/src/modules/envanter/components/EnvanterImportModal.tsx(13,12): error TS6133: 'selectedTable' is declared but its value is never read.
+src/renderer/src/modules/envanter/views/EnvanterDashboard.tsx(403,10): error TS6133: 'importBtnText' is declared but its value is never read.
+src/renderer/src/modules/envanter/views/EnvanterDashboard.tsx(406,14): error TS2304: Cannot find name 'Check'.
+src/renderer/src/modules/envanter/views/EnvanterSettings.tsx(3,23): error TS6133: 'X' is declared but its value is never read.
+src/renderer/src/modules/settings/views/EgitimSettings.tsx(38,5): error TS2339: Property 'getEgitimData' does not exist on type '{ egitimKonular: { id: number; baslik: string; sira?: number | undefined; }[]; konuEkle: (baslik: string) => Promise<void>; konuSil: (id: number) => Promise<void>; konuGuncelle: (id: number, baslik: string, sira?: number | undefined) => Promise<...>; ... 12 more ...; bildirim: { ...; } | null; }'.
+src/renderer/src/modules/settings/views/EgitimSettings.tsx(728,35): error TS2304: Cannot find name 'mesajGoster'.
+src/renderer/src/modules/yabanci_temsilcilikler/components/TemsilcilikCard.tsx(3,1): error TS6133: 'useTemsilcilikViewModel' is declared but its value is never read.
