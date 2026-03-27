@@ -1,0 +1,3 @@
+﻿\electron.vite.config.ts:7 - default
+\src\main\db\turk_temsilcilikleri.ts:16 - INITIAL_TURK_TEMSILCILIKLERI (used in module)
+\src\main\db\yabanci_temsilcilikler.ts:18 - INITIAL_TEMSILCILIKLER (used in module)
