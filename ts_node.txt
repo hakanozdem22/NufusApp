@@ -1,0 +1,3 @@
+﻿src/main/database.ts(1317,11): error TS6133: 'batch' is declared but its value is never read.
+src/main/db/setup_temsilcilikler.ts(1,26): error TS2307: Cannot find module 'sqlite3' or its corresponding type declarations.
+src/main/index.ts(3,54): error TS6133: 'session' is declared but its value is never read.
