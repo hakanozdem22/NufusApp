@@ -157,23 +157,6 @@ const TAG_COLORS: Record<string, string> = {
 
 const emptyForm = { ulke: '', site_adi: '', url: '', belge_turleri: '', aciklama: '' }
 
-// Bayrak görseli — ISO kodu ile dosyadan, bulunamazsa Globe ikonu
-const FlagImg = ({ bayrak, ulke, size = 40 }: { bayrak?: string; ulke?: string; size?: number }): ReactElement => {
-  const kod = bayrak || (ulke ? getKodFromUlke(ulke) : '')
-  const url = getFlagUrl(kod)
-  if (url) {
-    return (
-      <img
-        src={url}
-        alt={kod}
-        style={{ width: size, height: size * 0.67 }}
-        className="object-cover rounded shadow-sm"
-        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-      />
-    )
-  }
-  return <Globe size={size * 0.6} className="text-gray-300 dark:text-gray-600" />
-}
 
 export const BelgeDogrulamaView = (): ReactElement => {
   const [siteler, setSiteler] = useState<Site[]>([])
