@@ -38,6 +38,125 @@ def create_pdf(data_json):
         s_cell_left = ParagraphStyle('CellLeft', parent=styles['Normal'], fontName=font_name, fontSize=9, alignment=0)
 
         # =================================================================================
+        # SENARYO 0: RESMİ DERECE TERFİ LİSTESİ (PDF'TEKİ FORMAT)
+        # =================================================================================
+        if rapor_tipi == 'DERECE_TERFI_LISTE':
+            dosya_adi = f"Derece_Terfi_Listesi_{tarih_str}.pdf"
+            dosya_yolu = os.path.join(desktop, dosya_adi)
+            doc = SimpleDocTemplate(
+                dosya_yolu, pagesize=landscape(A4),
+                rightMargin=12*mm, leftMargin=12*mm,
+                topMargin=10*mm, bottomMargin=10*mm
+            )
+
+            donem_bas  = data.get('donem_bas', '')
+            donem_bit  = data.get('donem_bit', '')
+            teklif_ad  = data.get('teklif_eden_ad', '')
+            teklif_unv = data.get('teklif_eden_unvan', 'İlçe Nüfus Müdürü')
+            onay_ad    = data.get('onaylayan_ad', '')
+            onay_unv   = data.get('onaylayan_unvan', 'Kaymakam')
+            onay_tarih = data.get('onay_tarihi', '')
+
+            def fmt_tarih(iso):
+                try: return datetime.datetime.strptime(iso, '%Y-%m-%d').strftime('%d.%m.%Y')
+                except: return iso
+
+            donem_str = f"{fmt_tarih(donem_bas)} - {fmt_tarih(donem_bit)}" if donem_bas else ''
+
+            s_title   = ParagraphStyle('T', parent=styles['Normal'], fontName=font_name, fontSize=9,  alignment=1, leading=13)
+            s_donem   = ParagraphStyle('D', parent=styles['Normal'], fontName=font_name, fontSize=9,  alignment=1, leading=13)
+            s_th      = ParagraphStyle('TH', parent=styles['Normal'], fontName=font_name, fontSize=7, alignment=1, leading=9)
+            s_td      = ParagraphStyle('TD', parent=styles['Normal'], fontName=font_name, fontSize=8, alignment=1, leading=10)
+            s_td_l    = ParagraphStyle('TDL', parent=styles['Normal'], fontName=font_name, fontSize=8, alignment=0, leading=10)
+            s_imza    = ParagraphStyle('IM', parent=styles['Normal'], fontName=font_name, fontSize=8, alignment=1, leading=12)
+
+            # ÜST BAŞLIK BLOĞU (başlık sol, dönem sağ — tablo ile)
+            baslik_metni = (
+                "KAPAKLI KAYMAKAMLĞI İLÇE NÜFUS MÜDÜRLÜĞÜ PERSONELİNE AİT\n"
+                "DERECE TERFİ LİSTESİ"
+            )
+            usttable = Table(
+                [[Paragraph(f"<b>{baslik_metni}</b>", s_title),
+                  Paragraph(f"<b>AİT OLDUĞU AY</b><br/>{donem_str}", s_donem)]],
+                colWidths=[180*mm, 70*mm]
+            )
+            usttable.setStyle(TableStyle([
+                ('BOX',    (0,0), (-1,-1), 0.7, colors.black),
+                ('INNERGRID', (0,0), (-1,-1), 0.7, colors.black),
+                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                ('TOPPADDING',    (0,0), (-1,-1), 5),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+                ('FONTNAME', (0,0), (-1,-1), font_name),
+            ]))
+            elements.append(usttable)
+
+            # ANA TABLO
+            headers = [
+                Paragraph('<b>SIRA</b>', s_th),
+                Paragraph('<b>ADI SOYADI</b>', s_th),
+                Paragraph('<b>SİCİL NO</b>', s_th),
+                Paragraph('<b>GÖREV YERİ ÜNVANI</b>', s_th),
+                Paragraph('<b>KADRO</b>', s_th),
+                Paragraph('<b>ALMAKTA</b>', s_th),
+                Paragraph('<b>EMEKLİ MÜKTESEP</b>', s_th),
+                Paragraph('<b>KAZANILAN</b>', s_th),
+                Paragraph('<b>GEÇERLİLİK</b>', s_th),
+                Paragraph('<b>AÇIKLAMALAR</b>', s_th),
+            ]
+            # Toplam kullanılabilir: ~255mm (landscape A4 297mm - 24mm margin)
+            col_w = [10*mm, 35*mm, 18*mm, 55*mm, 14*mm, 18*mm, 22*mm, 18*mm, 24*mm, 41*mm]
+            table_data = [headers]
+
+            for idx, p in enumerate(liste, 1):
+                gecerlilik_str = fmt_tarih(p.get('gecerlilik', ''))
+                table_data.append([
+                    Paragraph(str(idx), s_td),
+                    Paragraph(str(p.get('ad_soyad', '')).upper(), s_td_l),
+                    Paragraph(str(p.get('sicil_no', '')), s_td),
+                    Paragraph(str(p.get('gorev_yeri_unvani', '')), s_td_l),
+                    Paragraph(str(p.get('kadro', '')), s_td),
+                    Paragraph(str(p.get('almakta', '')), s_td),
+                    Paragraph(str(p.get('emekli_muktesep', '')), s_td),
+                    Paragraph(str(p.get('kazanilan', '')), s_td),
+                    Paragraph(gecerlilik_str, s_td),
+                    Paragraph(str(p.get('aciklamalar', '')), s_td_l),
+                ])
+
+            t = Table(table_data, colWidths=col_w, repeatRows=1)
+            t.setStyle(TableStyle([
+                ('FONTNAME',  (0,0), (-1,-1), font_name),
+                ('GRID',      (0,0), (-1,-1), 0.5, colors.black),
+                ('ALIGN',     (0,0), (-1,-1), 'CENTER'),
+                ('VALIGN',    (0,0), (-1,-1), 'MIDDLE'),
+                ('BACKGROUND',(0,0), (-1,0),  colors.white),
+                ('TOPPADDING',    (0,0), (-1,-1), 3),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+                ('LEFTPADDING',   (0,0), (-1,-1), 2),
+                ('RIGHTPADDING',  (0,0), (-1,-1), 2),
+            ]))
+            elements.append(t)
+
+            # İMZA BLOĞU
+            elements.append(Spacer(1, 8*mm))
+            onay_tarih_str = fmt_tarih(onay_tarih) if onay_tarih else '    /    /        '
+            imza_data = [[
+                Paragraph(f"Teklif Eden:<br/><br/><b>{teklif_ad}</b><br/>{teklif_unv}", s_imza),
+                Paragraph('', s_imza),
+                Paragraph(f"Onaylayan : {onay_tarih_str}<br/><br/><b>{onay_ad}</b><br/>{onay_unv}", s_imza),
+            ]]
+            imza_t = Table(imza_data, colWidths=[70*mm, 115*mm, 70*mm])
+            imza_t.setStyle(TableStyle([
+                ('FONTNAME', (0,0), (-1,-1), font_name),
+                ('ALIGN',    (0,0), (-1,-1), 'CENTER'),
+                ('VALIGN',   (0,0), (-1,-1), 'TOP'),
+            ]))
+            elements.append(imza_t)
+
+            doc.build(elements)
+            print(json.dumps({"success": True, "path": dosya_yolu}))
+            return
+
+        # =================================================================================
         # SENARYO 1: TERFİ TEKLİF LİSTESİ (SADECE SEÇİLENLER - YATAY - RESMİ FORMAT)
         # =================================================================================
         if rapor_tipi == 'TERFI':

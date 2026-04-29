@@ -38,6 +38,8 @@ import { BelgelerView } from './modules/belgeler/views/BelgelerView'
 import { BelgeDogrulamaView } from './modules/belge_dogrulama/views/BelgeDogrulamaView'
 // Kurum Harcama
 import { KurumHarcamaView } from './modules/kurum_harcama/views/KurumHarcamaView'
+// Derece Terfi Listesi
+import { DereceTerfiView } from './modules/derece_terfi/views/DereceTerfiView'
 
 import { ThemeProvider } from './shared/context/ThemeContext'
 import { HeaderProvider } from './shared/context/HeaderContext'
@@ -89,6 +91,7 @@ function App(): React.ReactElement {
               <Route path="/belgeler" element={<BelgelerView />} />
               <Route path="/belge-dogrulama" element={<BelgeDogrulamaView />} />
               <Route path="/kurum-harcama" element={<KurumHarcamaView />} />
+              <Route path="/derece-terfi" element={<DereceTerfiView />} />
 
               <Route path="/ayarlar" element={<Settings />} />
               <Route path="*" element={<Dashboard />} />

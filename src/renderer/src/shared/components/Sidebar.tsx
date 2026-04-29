@@ -106,6 +106,7 @@ export const Sidebar = ({ isCollapsed, toggleSidebar }: SidebarProps): React.Rea
         subMenus: [
           { title: 'Harcama', src: <Wallet size={18} />, path: '/harcama' },
           { title: 'Terfi', src: <UserCheck size={18} />, path: '/personel-terfi' },
+          { title: 'Derece Terfi Listesi', src: <UserCheck size={18} />, path: '/derece-terfi' },
           { title: 'Hizmet İçi Eğitim', src: <GraduationCap size={18} />, path: '/egitim' },
           { title: 'Görevlendirmeler', src: <ClipboardList size={18} />, path: '/personel-gorevlendirme' }
         ]
