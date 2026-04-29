@@ -38,15 +38,21 @@ def create_pdf(data_json):
         s_cell_left = ParagraphStyle('CellLeft', parent=styles['Normal'], fontName=font_name, fontSize=9, alignment=0)
 
         # =================================================================================
-        # SENARYO 0: RESMİ DERECE TERFİ LİSTESİ (PDF'TEKİ FORMAT)
+        # SENARYO 0: RESMİ DERECE TERFİ LİSTESİ
         # =================================================================================
         if rapor_tipi == 'DERECE_TERFI_LISTE':
             dosya_adi = f"Derece_Terfi_Listesi_{tarih_str}.pdf"
             dosya_yolu = os.path.join(desktop, dosya_adi)
+
+            # Yatay A4: 297x210, kenar boşlukları 15mm
+            SAYFA_GEN = landscape(A4)[0]
+            KENAR     = 15 * mm
+            KULLAN_GEN = SAYFA_GEN - 2 * KENAR   # ~267mm
+
             doc = SimpleDocTemplate(
                 dosya_yolu, pagesize=landscape(A4),
-                rightMargin=12*mm, leftMargin=12*mm,
-                topMargin=10*mm, bottomMargin=10*mm
+                rightMargin=KENAR, leftMargin=KENAR,
+                topMargin=12*mm, bottomMargin=12*mm
             )
 
             donem_bas  = data.get('donem_bas', '')
@@ -58,97 +64,150 @@ def create_pdf(data_json):
             onay_tarih = data.get('onay_tarihi', '')
 
             def fmt_tarih(iso):
-                try: return datetime.datetime.strptime(iso, '%Y-%m-%d').strftime('%d.%m.%Y')
+                try:    return datetime.datetime.strptime(iso, '%Y-%m-%d').strftime('%d.%m.%Y')
                 except: return iso
 
             donem_str = f"{fmt_tarih(donem_bas)} - {fmt_tarih(donem_bit)}" if donem_bas else ''
 
-            s_title   = ParagraphStyle('T', parent=styles['Normal'], fontName=font_name, fontSize=9,  alignment=1, leading=13)
-            s_donem   = ParagraphStyle('D', parent=styles['Normal'], fontName=font_name, fontSize=9,  alignment=1, leading=13)
-            s_th      = ParagraphStyle('TH', parent=styles['Normal'], fontName=font_name, fontSize=7, alignment=1, leading=9)
-            s_td      = ParagraphStyle('TD', parent=styles['Normal'], fontName=font_name, fontSize=8, alignment=1, leading=10)
-            s_td_l    = ParagraphStyle('TDL', parent=styles['Normal'], fontName=font_name, fontSize=8, alignment=0, leading=10)
-            s_imza    = ParagraphStyle('IM', parent=styles['Normal'], fontName=font_name, fontSize=8, alignment=1, leading=12)
+            # ── Stiller ──────────────────────────────────────────
+            GRI_ACIK  = colors.Color(0.92, 0.92, 0.92)
+            GRI_KOYU  = colors.Color(0.80, 0.80, 0.80)
+            SIYAH     = colors.black
 
-            # ÜST BAŞLIK BLOĞU (başlık sol, dönem sağ — tablo ile)
-            baslik_metni = (
-                "KAPAKLI KAYMAKAMLĞI İLÇE NÜFUS MÜDÜRLÜĞÜ PERSONELİNE AİT\n"
-                "DERECE TERFİ LİSTESİ"
+            s_baslik_sol = ParagraphStyle('BS', fontName=font_name, fontSize=10,
+                                          alignment=1, leading=15, spaceAfter=0)
+            s_baslik_sag = ParagraphStyle('BSG', fontName=font_name, fontSize=10,
+                                          alignment=1, leading=14, spaceAfter=0)
+            s_th = ParagraphStyle('TH', fontName=font_name, fontSize=8,
+                                  alignment=1, leading=10, spaceAfter=0)
+            s_td = ParagraphStyle('TD', fontName=font_name, fontSize=9,
+                                  alignment=1, leading=11, spaceAfter=0)
+            s_td_l = ParagraphStyle('TDL', fontName=font_name, fontSize=9,
+                                    alignment=0, leading=11, spaceAfter=0)
+            s_imza_l = ParagraphStyle('IL', fontName=font_name, fontSize=9,
+                                      alignment=0, leading=13)
+            s_imza_r = ParagraphStyle('IR', fontName=font_name, fontSize=9,
+                                      alignment=2, leading=13)
+
+            # ── ÜST BAŞLIK TABLOSU ────────────────────────────────
+            # Sol hücre geniş (başlık), sağ hücre dar (dönem)
+            sol_genis  = KULLAN_GEN * 0.70
+            sag_genis  = KULLAN_GEN * 0.30
+
+            baslik_ust = Table(
+                [[
+                    Paragraph(
+                        "<b>KAPAKLI KAYMAKAMLĞI İLÇE NÜFUS MÜDÜRLÜĞÜ<br/>"
+                        "PERSONELİNE AİT DERECE TERFİ LİSTESİ</b>",
+                        s_baslik_sol
+                    ),
+                    Paragraph(
+                        f"<b>AİT OLDUĞU AY</b><br/>{donem_str}",
+                        s_baslik_sag
+                    )
+                ]],
+                colWidths=[sol_genis, sag_genis]
             )
-            usttable = Table(
-                [[Paragraph(f"<b>{baslik_metni}</b>", s_title),
-                  Paragraph(f"<b>AİT OLDUĞU AY</b><br/>{donem_str}", s_donem)]],
-                colWidths=[180*mm, 70*mm]
-            )
-            usttable.setStyle(TableStyle([
-                ('BOX',    (0,0), (-1,-1), 0.7, colors.black),
-                ('INNERGRID', (0,0), (-1,-1), 0.7, colors.black),
-                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-                ('TOPPADDING',    (0,0), (-1,-1), 5),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 5),
-                ('FONTNAME', (0,0), (-1,-1), font_name),
+            baslik_ust.setStyle(TableStyle([
+                ('BOX',           (0,0), (-1,-1), 0.8, SIYAH),
+                ('LINEAFTER',     (0,0), (0,0),   0.8, SIYAH),
+                ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
+                ('TOPPADDING',    (0,0), (-1,-1), 7),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 7),
+                ('LEFTPADDING',   (0,0), (0,0),   6),
+                ('RIGHTPADDING',  (0,0), (0,0),   6),
+                ('LEFTPADDING',   (1,0), (1,0),   6),
+                ('RIGHTPADDING',  (1,0), (1,0),   6),
             ]))
-            elements.append(usttable)
+            elements.append(baslik_ust)
 
-            # ANA TABLO
-            headers = [
-                Paragraph('<b>SIRA</b>', s_th),
-                Paragraph('<b>ADI SOYADI</b>', s_th),
-                Paragraph('<b>SİCİL NO</b>', s_th),
-                Paragraph('<b>GÖREV YERİ ÜNVANI</b>', s_th),
-                Paragraph('<b>KADRO</b>', s_th),
-                Paragraph('<b>ALMAKTA</b>', s_th),
-                Paragraph('<b>EMEKLİ MÜKTESEP</b>', s_th),
-                Paragraph('<b>KAZANILAN</b>', s_th),
-                Paragraph('<b>GEÇERLİLİK</b>', s_th),
-                Paragraph('<b>AÇIKLAMALAR</b>', s_th),
+            # ── ANA TABLO ─────────────────────────────────────────
+            # Sütun genişlikleri — toplam = KULLAN_GEN
+            # SIRA(10) ADI(38) SİCİL(18) GÖREV(58) KADRO(13) ALMAKTA(17)
+            # EMEKLİ(20) KAZANILAN(17) GEÇERLİLİK(22) AÇIKLAMALAR(54) = 267
+            col_w = [
+                10*mm, 38*mm, 18*mm, 58*mm,
+                13*mm, 17*mm, 20*mm, 17*mm,
+                22*mm, 54*mm
             ]
-            # Toplam kullanılabilir: ~255mm (landscape A4 297mm - 24mm margin)
-            col_w = [10*mm, 35*mm, 18*mm, 55*mm, 14*mm, 18*mm, 22*mm, 18*mm, 24*mm, 41*mm]
-            table_data = [headers]
+
+            headers = [
+                Paragraph('<b>SIRA</b>',            s_th),
+                Paragraph('<b>ADI SOYADI</b>',       s_th),
+                Paragraph('<b>SİCİL NO</b>',         s_th),
+                Paragraph('<b>GÖREV YERİ ÜNVANI</b>',s_th),
+                Paragraph('<b>KADRO</b>',             s_th),
+                Paragraph('<b>ALMAKTA</b>',           s_th),
+                Paragraph('<b>EMEKLİ<br/>MÜKTESEP</b>', s_th),
+                Paragraph('<b>KAZANILAN</b>',         s_th),
+                Paragraph('<b>GEÇERLİLİK</b>',       s_th),
+                Paragraph('<b>AÇIKLAMALAR</b>',       s_th),
+            ]
+            tablo_veri = [headers]
 
             for idx, p in enumerate(liste, 1):
-                gecerlilik_str = fmt_tarih(p.get('gecerlilik', ''))
-                table_data.append([
-                    Paragraph(str(idx), s_td),
-                    Paragraph(str(p.get('ad_soyad', '')).upper(), s_td_l),
-                    Paragraph(str(p.get('sicil_no', '')), s_td),
-                    Paragraph(str(p.get('gorev_yeri_unvani', '')), s_td_l),
-                    Paragraph(str(p.get('kadro', '')), s_td),
-                    Paragraph(str(p.get('almakta', '')), s_td),
-                    Paragraph(str(p.get('emekli_muktesep', '')), s_td),
-                    Paragraph(str(p.get('kazanilan', '')), s_td),
-                    Paragraph(gecerlilik_str, s_td),
-                    Paragraph(str(p.get('aciklamalar', '')), s_td_l),
+                tablo_veri.append([
+                    Paragraph(str(idx),                                      s_td),
+                    Paragraph(str(p.get('ad_soyad','')).upper(),             s_td_l),
+                    Paragraph(str(p.get('sicil_no','')),                     s_td),
+                    Paragraph(str(p.get('gorev_yeri_unvani','')),            s_td_l),
+                    Paragraph(str(p.get('kadro','')),                        s_td),
+                    Paragraph(str(p.get('almakta','')),                      s_td),
+                    Paragraph(str(p.get('emekli_muktesep','')),              s_td),
+                    Paragraph(str(p.get('kazanilan','')),                    s_td),
+                    Paragraph(fmt_tarih(p.get('gecerlilik','')),             s_td),
+                    Paragraph(str(p.get('aciklamalar','')),                  s_td_l),
                 ])
 
-            t = Table(table_data, colWidths=col_w, repeatRows=1)
+            t = Table(tablo_veri, colWidths=col_w, repeatRows=1)
             t.setStyle(TableStyle([
-                ('FONTNAME',  (0,0), (-1,-1), font_name),
-                ('GRID',      (0,0), (-1,-1), 0.5, colors.black),
-                ('ALIGN',     (0,0), (-1,-1), 'CENTER'),
-                ('VALIGN',    (0,0), (-1,-1), 'MIDDLE'),
-                ('BACKGROUND',(0,0), (-1,0),  colors.white),
-                ('TOPPADDING',    (0,0), (-1,-1), 3),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 3),
-                ('LEFTPADDING',   (0,0), (-1,-1), 2),
-                ('RIGHTPADDING',  (0,0), (-1,-1), 2),
+                ('FONTNAME',      (0,0), (-1,-1), font_name),
+                ('FONTSIZE',      (0,0), (-1,-1), 8),
+                ('GRID',          (0,0), (-1,-1), 0.5, SIYAH),
+                ('BOX',           (0,0), (-1,-1), 0.8, SIYAH),
+                ('ALIGN',         (0,0), (-1,-1), 'CENTER'),
+                ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
+                # Başlık satırı arka plan
+                ('BACKGROUND',    (0,0), (-1,0),  GRI_ACIK),
+                # Çift satır rengi
+                ('ROWBACKGROUNDS',(0,1), (-1,-1),  [colors.white, colors.Color(0.97, 0.97, 0.97)]),
+                # Adı ve görev yeri sola yasla
+                ('ALIGN',         (1,1), (1,-1),  'LEFT'),
+                ('ALIGN',         (3,1), (3,-1),  'LEFT'),
+                ('ALIGN',         (9,1), (9,-1),  'LEFT'),
+                ('TOPPADDING',    (0,0), (-1,-1), 4),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+                ('LEFTPADDING',   (0,0), (-1,-1), 3),
+                ('RIGHTPADDING',  (0,0), (-1,-1), 3),
             ]))
             elements.append(t)
 
-            # İMZA BLOĞU
-            elements.append(Spacer(1, 8*mm))
-            onay_tarih_str = fmt_tarih(onay_tarih) if onay_tarih else '    /    /        '
-            imza_data = [[
-                Paragraph(f"Teklif Eden:<br/><br/><b>{teklif_ad}</b><br/>{teklif_unv}", s_imza),
-                Paragraph('', s_imza),
-                Paragraph(f"Onaylayan : {onay_tarih_str}<br/><br/><b>{onay_ad}</b><br/>{onay_unv}", s_imza),
-            ]]
-            imza_t = Table(imza_data, colWidths=[70*mm, 115*mm, 70*mm])
+            # ── İMZA BLOĞU ────────────────────────────────────────
+            elements.append(Spacer(1, 10*mm))
+
+            onay_tarih_str = fmt_tarih(onay_tarih) if onay_tarih else '.…/…./………'
+
+            imza_sol = (
+                f"Teklif Eden:\n\n"
+                f"{teklif_ad}\n"
+                f"{teklif_unv}"
+            )
+            imza_sag = (
+                f"Onaylayan : {onay_tarih_str}\n\n"
+                f"{onay_ad}\n"
+                f"{onay_unv}"
+            )
+
+            imza_t = Table(
+                [[Paragraph(imza_sol.replace('\n','<br/>'), s_imza_l),
+                  Paragraph(imza_sag.replace('\n','<br/>'), s_imza_r)]],
+                colWidths=[KULLAN_GEN / 2, KULLAN_GEN / 2]
+            )
             imza_t.setStyle(TableStyle([
                 ('FONTNAME', (0,0), (-1,-1), font_name),
-                ('ALIGN',    (0,0), (-1,-1), 'CENTER'),
                 ('VALIGN',   (0,0), (-1,-1), 'TOP'),
+                ('TOPPADDING',    (0,0), (-1,-1), 0),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 0),
             ]))
             elements.append(imza_t)
 
