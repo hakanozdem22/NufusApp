@@ -237,7 +237,7 @@ export const EnvanterDashboard = (): ReactElement => {
                 <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
                   <Package size={22} strokeWidth={2.5} />
                 </div>
-                <h1 className="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">Envanter Yönetimi</h1>
+                <h1 className="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">Taşınır Envanteri (Elektronik)</h1>
               </div>
               <p className="text-gray-400 font-bold text-[11px] uppercase tracking-widest ml-13">Taşınır Malzeme Kontrol Paneli</p>
             </div>

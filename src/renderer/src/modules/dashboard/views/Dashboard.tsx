@@ -153,7 +153,7 @@ export const Dashboard = (): React.ReactElement => {
 
           {/* 12. Envanter */}
           <DashboardCard
-            title="Envanter"
+            title="Taşınır Envanteri (Elektronik)"
             desc="Malzeme yönetimi"
             icon={Package}
             color="emerald"
