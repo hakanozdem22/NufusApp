@@ -1,7 +1,7 @@
 import { useState, useEffect, ReactElement } from 'react'
 import {
   Plus, Trash2, FileText, X, ChevronDown, ChevronUp,
-  UserCheck, AlertCircle, Settings, RefreshCw, Users, CheckCircle
+  UserCheck, AlertCircle, Settings, RefreshCw, Users, CheckCircle, Eraser
 } from 'lucide-react'
 
 interface TerfiSatiri {
@@ -243,6 +243,13 @@ export const DereceTerfiView = (): ReactElement => {
             <button onClick={satirEkle}
               className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-black text-gray-500 hover:text-blue-600 transition-all shadow-sm">
               <Plus size={14} strokeWidth={3} /> Satır Ekle
+            </button>
+
+            <button
+              onClick={() => setSatirlar([BOŞ_SATIR()])}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-800 rounded-2xl text-xs font-black text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all shadow-sm"
+            >
+              <Eraser size={14} strokeWidth={2.5} /> Listeyi Temizle
             </button>
 
             <button onClick={pdfOlustur} disabled={yukleniyor}
