@@ -198,10 +198,13 @@ def create_pdf(data_json):
                 f"{onay_unv}"
             )
 
+            yan = 60*mm
+            orta = KULLAN_GEN - 2 * yan
             imza_t = Table(
                 [[Paragraph(imza_sol.replace('\n','<br/>'), s_imza_l),
+                  Paragraph('', s_imza_l),
                   Paragraph(imza_sag.replace('\n','<br/>'), s_imza_r)]],
-                colWidths=[KULLAN_GEN / 2, KULLAN_GEN / 2]
+                colWidths=[yan, orta, yan]
             )
             imza_t.setStyle(TableStyle([
                 ('FONTNAME', (0,0), (-1,-1), font_name),
